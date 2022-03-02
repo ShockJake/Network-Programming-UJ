@@ -8,6 +8,11 @@
     i dodatkowo zapisują w globalnej zmiennej errno kod wskazujący przyczynę wystąpienia błędu (na dysku nie ma pliku o takiej nazwie,
     brak wystarczających praw dostępu, itd.).
     Polecam Państwa uwadze pomocniczą funkcję perror, która potrafi przetłumaczyć ten kod na zrozumiały dla człowieka komunikat i wypisać go na ekranie.
+
+    *** Modyfikacja powyższego zadania. Zakładamy, że kopiowany plik jest plikiem tekstowym. 
+    Linie są zakończone bajtami o wartości 10 (znaki LF, w języku C zapisywane jako '\n'). 
+    Podczas kopiowania należy pomijać parzyste linie (tzn. w pliku wynikowym mają się znaleźć pierwsza, 
+    trzecia, piąta linia, a druga, czwarta, szósta nie).
 */
 
 #include <stdio.h>
@@ -27,6 +32,8 @@ int main(int argc, char const *argv[])
     int fileToRead;
     // deskryptor dla pliku do wpisania
     int fileToWrite;
+    // zmienna dla sprawdzania czy linijka jest parzysta
+    int isOdd = 0;
     // główny buffor dla przechowywania danych
     char buff[1];
     // ilość bajtów dla oddziaływania
@@ -37,10 +44,11 @@ int main(int argc, char const *argv[])
     mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
     // nazwa pliku do odczytu
     const char *readFileName = argv[1];
-    // ścieżka oraz nazwa pliku dla wpisania danych
+    // ścieżka oraz nazwa pliku dla wpisania danych 
     char *writeFileName = "/home/stas/Projects/NetProg/Zestaw1/Zadanie7/new_file.txt";
+
     // Otwieranie deskryptora dla pliku do odczytu
-    fileToRead = open(readFileName, O_RDONLY);
+    fileToRead = open(readFileName, O_RDONLY); 
     if (fileToRead == -1)
     {
         perror("Can't open file to read");
@@ -55,8 +63,6 @@ int main(int argc, char const *argv[])
         _exit(-1);
     }
 
-    printf("\nProcessing...\n");
-
     // Odczyt danych bajt po bajcie
     while ((bufferSize = read(fileToRead, buff, nbytes)) != 0)
     {
@@ -65,13 +71,20 @@ int main(int argc, char const *argv[])
             perror("Unable to read the file");
             _exit(-1);
         }
-        bufferSize = write(fileToWrite, buff, nbytes); // Wpysanie danych
-        if (bufferSize == -1)
+        if (buff[0] == '\n') // Sprawdzanie czy aktualny bajt jest końcem linijki
         {
-            perror("Unable to write data to a file");
-            _exit(-1);
+            isOdd++; 
+        }
+        if(!(isOdd % 2)) // Sprawdzanie czy linijka jest parzysta
+        {
+            bufferSize = write(fileToWrite, buff, nbytes); // Wpysanie danych
+            if (bufferSize == -1)
+            {
+                perror("Unable to write data to a file");
+                _exit(-1);
+            }
         }
     }
-    printf("Done\n");
+
     return 0;
 }
