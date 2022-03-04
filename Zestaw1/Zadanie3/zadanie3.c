@@ -19,7 +19,7 @@ bool drukowalne(const void *buf, int len)
 {
     const char *char_buf = (char *)buf; // Konwersja z "ogólnego" wskażnika do wskażnika na char
 
-    for (int i = 0; i < len; i++)
+    for (int i = 0; i < len; i++) // Sprawdzenie danych
     {
         if (char_buf[i] <= 32 || char_buf[i] >= 126)
         {
@@ -34,7 +34,7 @@ bool drukowalneP(const void *buf, int len)
 {
     const char *char_buf = (char *)buf; // Konwersja z "ogólnego" wskażnika do wskażnika na char
 
-    for (int i = 0; i < len; i++)
+    for (int i = 0; i < len; i++) // Sprawdzenie danych
     {
         if (*(char_buf + i) <= 32 || *(char_buf + i) >= 126)
         {
@@ -66,7 +66,7 @@ int main(int argc, char const *argv[])
         printf("2 - %c\n", arr2[i]);
     }
 
-    // Testowanie funkcji
+    // Testowanie funkcji na podstawie indeksowania tablicy
     if (drukowalne(arr1, SIZE))
     {
         printf("\nAll elements of first array are drowable.\n");
@@ -75,7 +75,7 @@ int main(int argc, char const *argv[])
     {
         printf("\nAll elements of first array are not drowable.\n");
     }
-
+    // Testowanie funkcji na podstawie przesuwania wskażnika
     if (drukowalneP(arr2, SIZE))
     {
         printf("\nAll elements of second array are drowable.\n");

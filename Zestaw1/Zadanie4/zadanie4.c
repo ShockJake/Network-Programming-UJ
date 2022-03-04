@@ -14,7 +14,7 @@ bool drukowalne(const char *buf)
 {
     const int SIZE = sizeof(buf) - sizeof(buf[0]); // Wyliczanie rozmiaru
 
-    for (int i = 0; i < SIZE; i++)
+    for (int i = 0; i < SIZE; i++) // Sprawdzanie danych
     {
         if (buf[i] <= 32 || buf[i] >= 126)
         {
@@ -28,7 +28,8 @@ bool drukowalne(const char *buf)
 bool drukowalneP(const char *buf)
 {
     const int SIZE = sizeof(buf) - sizeof(buf[0]); // Wyliczanie rozmiaru
-    for (int i = 0; i < SIZE; i++)
+
+    for (int i = 0; i < SIZE; i++) // Sprawdzanie danych
     {
         if (*(buf + i) <= 32 || *(buf + i) >= 126)
         {

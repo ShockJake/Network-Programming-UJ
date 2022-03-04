@@ -21,7 +21,7 @@
 int main(int argc, char const *argv[])
 {
     printf("\nProgram to write data from a file to another file\n");
-    printf("\n\nFile name %s\n", argv[1]);
+    printf("\n\nFile name: %s\n", argv[1]);
 
     // deskryptor dla pliku do odczytu
     int fileToRead;
@@ -39,6 +39,9 @@ int main(int argc, char const *argv[])
     const char *readFileName = argv[1];
     // ścieżka oraz nazwa pliku dla wpisania danych
     char *writeFileName = "/home/stas/Projects/NetProg/Zestaw1/Zadanie7/new_file.txt";
+    // Zmienna dla ślezenia ilości bajtów -pomocnicza-
+    int i = 0;
+
     // Otwieranie deskryptora dla pliku do odczytu
     fileToRead = open(readFileName, O_RDONLY);
     if (fileToRead == -1)
@@ -71,6 +74,12 @@ int main(int argc, char const *argv[])
             perror("Unable to write data to a file");
             _exit(-1);
         }
+        if ((i % 25) == 0)  //
+        {                   //
+            printf(".\n");  // Powolnienie programu 
+            sleep(1);       //
+        }                   //
+        i++;
     }
     printf("Done\n");
     return 0;
