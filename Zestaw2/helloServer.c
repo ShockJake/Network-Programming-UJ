@@ -15,20 +15,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-// Struktura zawierająca adres
-struct in_addr
-{
-    in_addr_t s_addr;
-};
-
-// Struktura zawierająca dane dla połączenias
-struct sockaddr_in
-{
-    sa_family_t sin_family;
-    in_port_t sin_port; // w sieciowej kolejności bajtów
-    struct in_addr sin_addr;
-};
-
 // Funckja dla wypełnienia struktury z danymi dla połączenia
 void fillSocketFields(struct sockaddr_in *adres, int port)
 {
@@ -66,7 +52,11 @@ void startHelloServer(int port)
     int sfd = createSocket();
 
     // Wypełnienie sockaddr_in
-    fillSocketFields(&adres, port);
+    // fillSocketFields(&adres, port);
+    memset(&adres, 0, sizeof(adres));
+    adres.sin_family = AF_INET;
+    adres.sin_port = htons(port);
+    adres.sin_addr.s_addr = htonl(INADDR_ANY);
 
     // Cast do const struct sockaddr dla podania do funkcji
     const struct sockaddr *addr = (const struct sockaddr *)&adres;
@@ -84,7 +74,7 @@ void startHelloServer(int port)
         perror("Can't make the socket to listen");
         _exit(-1);
     }
-    
+
     printf("\nServer is created, and listening on this port: %d\n", port);
 
     // Główna pętla
@@ -100,22 +90,25 @@ void startHelloServer(int port)
 
         struct sockaddr_storage _addr;
         socklen_t lenght = sizeof(_addr);
-        
-        if(getpeername(sfd, (struct sockaddr *)&_addr, &lenght) == -1)
+
+        if (getsockname(acd, (struct sockaddr *)&_addr, &lenght) == -1)
         {
             perror("Can't get name of peer");
             _exit(-1);
         }
 
-        printf("Connected with: %d : %d", _addr.__ss_align, port);
+        printf("Connected with: %s : %d\n", _addr.__ss_padding, port);
 
         // Wysłanie danych do klientu
         byteN = write(acd, msg, 15);
         if (byteN == -1)
         {
             perror("Can't send data");
-            _exit(-1);
+            close(acd);
+            continue;
         }
+
+        printf("Message has been sent succsefully\n");
 
         // Zamykanie połączenia
         if (close(acd) == -1)
@@ -123,6 +116,11 @@ void startHelloServer(int port)
             perror("Can't close the connection");
             _exit(-1);
         }
+    }
+    if (close(sfd) == -1)
+    {
+        perror("Can't close the socket");
+        _exit(-1);
     }
 }
 
@@ -133,7 +131,7 @@ int main(int argc, char const *argv[])
     if (argc < 2)
     {
         printf("You wrote incorrect amount of arguments\n");
-        printf("\n*** Usage:\n first argument - port of the serer you want to create.\n");
+        printf("\n*** Usage:\n first argument - port of the server you want to create.\n\n");
         _exit(0);
     }
     // Port na którym gniazdko będzie słuchać i czekać na połączenie
