@@ -16,6 +16,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+// Deskryptor soketu
 int sfd;
 
 // Funkcja tworząca gniazdo
@@ -33,7 +34,8 @@ int createSocket()
 // Funckja która zamyka socket
 void sig_handler(int signum)
 {
-    puts("\nClosing server...\n");
+    sleep(1);
+    printf("\nClosing server...\n");
     if (close(sfd) == -1)
     {
         perror("Can't close server");
