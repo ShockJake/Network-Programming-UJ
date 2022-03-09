@@ -12,8 +12,10 @@ int main(int argc, char const *argv[])
 {
     // Rozmiar tablicy
     const int SIZE = 50;
+    
     // Tablica liczb całkowitych
     int arr[SIZE];
+
     // zmienna dla przechowywania danych podanych przez użytkownika
     int input;
 
