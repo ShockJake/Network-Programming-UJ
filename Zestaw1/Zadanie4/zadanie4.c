@@ -16,7 +16,7 @@ bool drukowalne(const char *buf)
 
     for (int i = 0; i < SIZE; i++) // Sprawdzanie danych
     {
-        if (buf[i] <= 32 || buf[i] >= 126)
+        if (buf[i] < 32 || buf[i] > 126)
         {
             return false;
         }
@@ -31,7 +31,7 @@ bool drukowalneP(const char *buf)
 
     for (int i = 0; i < SIZE; i++) // Sprawdzanie danych
     {
-        if (*(buf + i) <= 32 || *(buf + i) >= 126)
+        if (*(buf++) < 32 || *(buf++) > 126)
         {
             return false;
         }

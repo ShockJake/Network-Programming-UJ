@@ -21,7 +21,7 @@ bool drukowalne(const void *buf, int len)
 
     for (int i = 0; i < len; i++) // Sprawdzenie danych
     {
-        if (char_buf[i] <= 32 || char_buf[i] >= 126)
+        if (char_buf[i] < 32 || char_buf[i] > 126)
         {
             return false;
         }
@@ -36,10 +36,11 @@ bool drukowalneP(const void *buf, int len)
 
     for (int i = 0; i < len; i++) // Sprawdzenie danych
     {
-        if (*(char_buf + i) <= 32 || *(char_buf + i) >= 126)
+        if (*(char_buf) < 32 || *(char_buf) > 126)
         {
             return false;
         }
+        char_buf++;
     }
     return true;
 }
@@ -48,8 +49,10 @@ int main(int argc, char const *argv[])
 {
     // Rozmiar dla tablic
     const int SIZE = 10;
+
     // Pierwsza tablica, elementy której są w przedziale
     char arr1[SIZE];
+
     // Druga tablica, elementy której nie są w przedziale
     char arr2[SIZE];
 
@@ -66,8 +69,11 @@ int main(int argc, char const *argv[])
         printf("2 - %c\n", arr2[i]);
     }
 
+    char *p1 = arr1;
+    char *p2 = arr2;
+
     // Testowanie funkcji na podstawie indeksowania tablicy
-    if (drukowalne(arr1, SIZE))
+    if (drukowalne(p1, SIZE))
     {
         printf("\nAll elements of first array are drowable.\n");
     }
@@ -76,7 +82,7 @@ int main(int argc, char const *argv[])
         printf("\nAll elements of first array are not drowable.\n");
     }
     // Testowanie funkcji na podstawie przesuwania wskażnika
-    if (drukowalneP(arr2, SIZE))
+    if (drukowalneP(p2, SIZE))
     {
         printf("\nAll elements of second array are drowable.\n");
     }

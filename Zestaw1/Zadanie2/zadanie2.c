@@ -1,5 +1,5 @@
 /*
-    Powyższy program prawdopodobnie używał indeksowania tablic. 
+    Powyższy program prawdopodobnie używał indeksowania tablic.
     Jeśli tak, to przerób go aby korzystał ze wskaźników i aby nigdzie w kodzie nie występowało liczby[i].
 */
 
@@ -9,8 +9,10 @@ int main(int argc, char const *argv[])
 {
     // Rozmiar tablicy
     const int SIZE = 50;
+
     // Tablica liczb całkowitych
     int arr[SIZE];
+
     // zmienna dla przechowywania danych podanych przez użytkownika
     int input;
 
@@ -30,6 +32,10 @@ int main(int argc, char const *argv[])
 
     for (int i = 0; i < SIZE; i++)               //
     {                                            //
+        if (*(arr + i) == 0)                     //
+        {                                        //
+            break;                               //
+        }                                        //
         if (*(arr + i) < 100 && *(arr + i) > 10) //
         {                                        // Wypisanie danych
             printf("%d\n", *(arr + i));          //

@@ -30,20 +30,28 @@ int main(int argc, char const *argv[])
 
     // deskryptor dla pliku do odczytu
     int fileToRead;
+
     // deskryptor dla pliku do wpisania
     int fileToWrite;
+
     // zmienna dla sprawdzania czy linijka jest parzysta
     int isOdd = 0;
+
     // główny buffor dla przechowywania danych
     char buff[1];
+
     // ilość bajtów dla oddziaływania
     size_t nbytes = sizeof(buff);
+
     // zmienna dla sprawdzania stanu funkcji
     ssize_t bufferSize;
+
     // zbiór flagów dla tworzenia pliku
     mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
+
     // nazwa pliku do odczytu
     const char *readFileName = argv[1];
+    
     // ścieżka oraz nazwa pliku dla wpisania danych 
     char *writeFileName = "/home/stas/Projects/NetProg/Zestaw1/Zadanie7/new_file.txt";
 
@@ -84,6 +92,17 @@ int main(int argc, char const *argv[])
                 _exit(-1);
             }
         }
+    }
+
+    if(close(fileToRead) == -1)
+    {
+        perror("Can't close file to read");
+        _exit(-1);
+    }
+    if(close(fileToWrite) == -1)
+    {
+        perror("Can't close file to write");
+        _exit(-1);
     }
 
     return 0;
