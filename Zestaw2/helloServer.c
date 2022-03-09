@@ -10,19 +10,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <signal.h>
 #include <string.h>
 #include <stdbool.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-// Funckja dla wypełnienia struktury z danymi dla połączenia
-void fillSocketFields(struct sockaddr_in *adres, int port)
-{
-    memset(&adres, 0, sizeof(adres));
-    adres->sin_family = AF_INET;
-    adres->sin_port = htons(port);
-    adres->sin_addr.s_addr = htonl(INADDR_ANY);
-}
+int sfd;
 
 // Funkcja tworząca gniazdo
 int createSocket()
@@ -36,9 +30,22 @@ int createSocket()
     return result;
 }
 
+// Funckja która zamyka socket
+void sig_handler(int signum)
+{
+    puts("\nClosing server...\n");
+    if (close(sfd) == -1)
+    {
+        perror("Can't close server");
+        _exit(-1);
+    }
+    _exit(0);
+}
+
 // Funkcja do tworzenia i startowania serweru
 void startHelloServer(int port)
 {
+
     // Wyzytówka do wypisania
     const char *msg = "Hello World!\r\n";
 
@@ -49,10 +56,9 @@ void startHelloServer(int port)
     struct sockaddr_in adres;
 
     // Tworzenie gniazdka
-    int sfd = createSocket();
+    sfd = createSocket();
 
     // Wypełnienie sockaddr_in
-    // fillSocketFields(&adres, port);
     memset(&adres, 0, sizeof(adres));
     adres.sin_family = AF_INET;
     adres.sin_port = htons(port);
@@ -88,16 +94,18 @@ void startHelloServer(int port)
             _exit(-1);
         }
 
+        // Strutrura dla przechowywania danych o połączonym urządzeniu
         struct sockaddr_storage _addr;
         socklen_t lenght = sizeof(_addr);
 
+        // Pobieranie imienia połączonego urządzenia
         if (getsockname(acd, (struct sockaddr *)&_addr, &lenght) == -1)
         {
             perror("Can't get name of peer");
             _exit(-1);
         }
 
-        printf("Connected with: %s : %d\n", _addr.__ss_padding, port);
+        printf("Connected with: %ld : %d\n", _addr.__ss_align, port);
 
         // Wysłanie danych do klientu
         byteN = write(acd, msg, 15);
@@ -119,13 +127,14 @@ void startHelloServer(int port)
     }
     if (close(sfd) == -1)
     {
-        perror("Can't close the socket");
+        perror("Can't close server");
         _exit(-1);
     }
 }
 
 int main(int argc, char const *argv[])
 {
+    signal(SIGINT, sig_handler);
 
     // Sprawdzanie ilości argumentów
     if (argc < 2)
@@ -138,7 +147,7 @@ int main(int argc, char const *argv[])
     int port = strtol(argv[1], NULL, 10);
     if (port == 0) // Sprawdzenie czy udała się konwersja na int
     {
-        perror("Wrong input (port)");
+        perror("Wrong input");
         _exit(-1);
     }
     if (port < 1024) // Sprawdzenie czy podany port nie jest zamały
@@ -146,6 +155,7 @@ int main(int argc, char const *argv[])
         printf("\nGiven port is to small\n");
         _exit(0);
     }
+
     startHelloServer(port);
 
     return 0;
