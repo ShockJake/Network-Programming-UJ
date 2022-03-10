@@ -10,11 +10,9 @@
 #include <stdbool.h>
 
 // Funckja dla sprawdzania czy podany buffor zawiera drukowalne znaki ASCII (oparta na indeksowaniu tablicy)
-bool drukowalne(const char *buf)
+bool drukowalne(const char *buf, int size)
 {
-    const int SIZE = sizeof(buf) - sizeof(buf[0]); // Wyliczanie rozmiaru
-
-    for (int i = 0; i < SIZE; i++) // Sprawdzanie danych
+    for (int i = 0; i < size; i++) // Sprawdzanie danych
     {
         if (buf[i] < 32 || buf[i] > 126)
         {
@@ -25,11 +23,9 @@ bool drukowalne(const char *buf)
 }
 
 // Funckja dla sprawdzania czy podany buffor zawiera drukowalne znaki ASCII (oparta na przesuwającym się wskażniku)
-bool drukowalneP(const char *buf)
+bool drukowalneP(const char *buf, int size)
 {
-    const int SIZE = sizeof(buf) - sizeof(buf[0]); // Wyliczanie rozmiaru
-
-    for (int i = 0; i < SIZE; i++) // Sprawdzanie danych
+    for (int i = 0; i < size; i++) // Sprawdzanie danych
     {
         if (*(buf++) < 32 || *(buf++) > 126)
         {
@@ -43,8 +39,10 @@ int main(int argc, char const *argv[])
 {
     // Rozmiar dla tablic
     const int SIZE = 10;
+    
     // Pierwsza tablica, elementy której są w przedziale
     char arr1[SIZE];
+   
     // Druga tablica, elementy której nie są w przedziale
     char arr2[SIZE];
 
@@ -62,7 +60,7 @@ int main(int argc, char const *argv[])
     }
 
     // Testowanie funkcji
-    if (drukowalne(arr1))
+    if (drukowalne(arr1, SIZE))
     {
         printf("\nAll elements of first array are drowable.\n");
     }
@@ -71,7 +69,7 @@ int main(int argc, char const *argv[])
         printf("\nAll elements of first array are not drowable.\n");
     }
 
-    if (drukowalneP(arr2))
+    if (drukowalneP(arr2, SIZE))
     {
         printf("\nAll elements of second array are drowable.\n");
     }
