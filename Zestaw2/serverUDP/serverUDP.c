@@ -20,8 +20,10 @@
 
 #define MAXLINE 1024
 
+// socket deskrytor
 int sd;
 
+// Funkcja dla tworzenia deskryptora
 int createSocket()
 {
     int result = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -33,6 +35,7 @@ int createSocket()
     return result;
 }
 
+// Funkcja dla przechwytu sygnału
 void signal_handler(int signum)
 {
     printf("\nClosing server...\n");
@@ -44,6 +47,7 @@ void signal_handler(int signum)
     _exit(0);
 }
 
+// Funkcja dla potwierdzenia połączenia
 bool verifyConnection(int sockD, char buf[], socklen_t lenght, struct sockaddr *sockaddr_in)
 {
     int n;
@@ -65,14 +69,16 @@ void startUDPServer(int port)
     // Główny buffor
     char buf[MAXLINE];
 
+    // Powiadomienie dla klientu
     char msg[13] = "Hello World\n";
 
+    // Struktury dla strony serweru i klientu
     struct sockaddr_in server_addr, client_addr;
 
     memset(&server_addr, 0, sizeof(server_addr));
     memset(&client_addr, 0, sizeof(client_addr));
 
-    // Wypełnianie informacji o serverze
+    // Wypełnianie informacji o serwerze
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(port);
     server_addr.sin_addr.s_addr = INADDR_ANY;
@@ -85,11 +91,14 @@ void startUDPServer(int port)
 
     socklen_t len = sizeof(client_addr);
 
+    // Główna pętla
     while (true)
     {
         if (verifyConnection(sd, buf, len, (struct sockaddr *)&client_addr))
         {
             printf("Sending a message...\n");
+
+            // Wysyłka powiadomienia
             int result = sendto(sd, msg, strlen(msg), MSG_CONFIRM, (struct sockaddr *)&client_addr, len);
             if (result == -1)
             {
