@@ -11,6 +11,7 @@
 
 #define MAX_LINE 1024
 
+// Funkcja dla tworzenia soketu
 int createSocket()
 {
     int result = socket(AF_INET, SOCK_DGRAM, 0);
@@ -24,15 +25,18 @@ int createSocket()
 
 void startUDPClient(const char *ip, int port)
 {
-    // Tworzenie deskryprora klienckiego
+    // Tworzenie deskryprora klienckiego (client deskryptor)
     int cd = createSocket();
 
+    // Główny buffor
     char buf[MAX_LINE];
 
+    // Powiadomienie dla wysyłania do serwera
     char *msg = "Hi, I like chocolate with caramel\n";
 
     struct sockaddr_in server_addr;
 
+    // Zapełnienie danych o serwerze
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(port);
@@ -40,9 +44,11 @@ void startUDPClient(const char *ip, int port)
 
     int n, len;
 
+    // Wysyłka powiadomienia do serwera
     sendto(cd, msg, strlen(msg), MSG_CONFIRM, (struct sockaddr *)&server_addr, sizeof(server_addr));
     printf("\n-----\nMessage was successfully sent\n-----\n");
 
+    // Przyjmowanie odwrotnego powiadomienia
     n = recvfrom(cd, buf, MAX_LINE, MSG_WAITALL, (struct sockaddr *)&server_addr, &len);
     if(n == -1)
     {
@@ -56,6 +62,7 @@ void startUDPClient(const char *ip, int port)
 
 int main(int argc, char const *argv[])
 {
+    // Sprawdzanie agrumentów
     if (argc < 3)
     {
         printf("You wrote incorrect amount of arguments\n");
