@@ -16,8 +16,11 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <sys/signal.h>
 
 #define MAXLINE 1024
+
+int sd;
 
 int createSocket()
 {
@@ -30,26 +33,41 @@ int createSocket()
     return result;
 }
 
-bool verifyConnection(int sockD, char buf[], int lenght, struct sockaddr* sockaddr_in)
+void signal_handler(int signum)
+{
+    printf("\nClosing server...\n");
+    if (close(sd) == -1)
+    {
+        perror("Can't close the server");
+	    _exit(-1);
+    }
+    _exit(0);
+}
+
+bool verifyConnection(int sockD, char buf[], socklen_t lenght, struct sockaddr *sockaddr_in)
 {
     int n;
-    n = recvfrom(sockD, buf, MAXLINE, MSG_WAITALL, &sockaddr_in, &lenght);
-
+    n = recvfrom(sockD, buf, MAXLINE, MSG_WAITALL, sockaddr_in, &lenght);
+    if (n > 0)
+    {
+        printf("\n-!!!- Connection is established successfully...\n");
+        printf("\nMessage from client: %s", buf);
+        return true;
+    }
+    return false;
 }
 
 void startUDPServer(int port)
 {
     // Tworzenie deskryptora dla soketu
-    int sd = createSocket();
+    sd = createSocket();
 
     // Główny buffor
     char buf[MAXLINE];
 
-    struct sockaddr_in server_addr, client_addr;
+    char msg[13] = "Hello World\n";
 
-    // Ilość opracowanych bajtów
-    ssize_t byteS;
-    ssize_t byteR;
+    struct sockaddr_in server_addr, client_addr;
 
     memset(&server_addr, 0, sizeof(server_addr));
     memset(&client_addr, 0, sizeof(client_addr));
@@ -65,15 +83,54 @@ void startUDPServer(int port)
         _exit(-1);
     }
 
-    int n, len;
+    socklen_t len = sizeof(client_addr);
 
-    len = sizeof(client_addr);
-
-
+    while (true)
+    {
+        if (verifyConnection(sd, buf, len, (struct sockaddr *)&client_addr))
+        {
+            printf("Sending a message...\n");
+            int result = sendto(sd, msg, strlen(msg), MSG_CONFIRM, (struct sockaddr *)&client_addr, len);
+            if (result == -1)
+            {
+                perror("Can't send a message");
+                printf("\nCan't send a message\n");
+            }
+            else
+            {
+                printf("\nMessage was sent successfully...\n");
+            }
+        }
+    }
 }
 
 int main(int argc, char const *argv[])
 {
+
+    signal(SIGINT, signal_handler);
+
+    // Sprawdzanie ilości argumentów
+    if (argc < 2)
+    {
+        printf("You wrote incorrect amount of arguments\n");
+        printf("\n*** Usage:\n first argument - port of the server you want to create.\n\n");
+        _exit(0);
+    }
+    // Port na którym gniazdko będzie słuchać i czekać na połączenie
+    int port = strtol(argv[1], NULL, 10);
+    if (port == 0) // Sprawdzenie czy udała się konwersja na int
+    {
+        perror("Wrong input");
+        _exit(-1);
+    }
+    if (port < 1024) // Sprawdzenie czy podany port nie jest zamały
+    {
+        printf("\nGiven port is to small\n");
+        _exit(0);
+    }
+
+    printf("\nStarting UDP server\n");
+    startUDPServer(port);
 
     return 0;
 }
