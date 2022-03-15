@@ -23,6 +23,31 @@ int createSocket()
     return result;
 }
 
+// Funkcja dla sprawdzania drukowalności danych
+bool isDrowable(void *input, int size)
+{
+    char *buf = (char *)input;
+
+    for (int i = 0; i < size; i++)
+    {
+        if (buf[i] < 32 || buf[i] > 126)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+// Funkcja dla sprawdzania drukowalności pojedynczego znaku
+bool isDrowableChar(const char c)
+{
+    if (c < 32 || c > 126)
+    {
+        return false;
+    }
+    return true;
+}
+
 void startUDPClient(const char *ip, int port)
 {
     // Tworzenie deskryprora klienckiego (client deskryptor)
@@ -55,7 +80,10 @@ void startUDPClient(const char *ip, int port)
         printf("- !!! - Can't receive data from server\n");
     }
     buf[n] = '\0';
-    printf("Server: %s", buf);
+    if(isDrowable(buf, n))
+    {
+        printf("Server: %s", buf);
+    }
 
     close(cd);
 }

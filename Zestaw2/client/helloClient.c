@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdbool.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -25,6 +26,31 @@ int createSocket()
         _exit(-1);
     }
     return result;
+}
+
+// Funkcja dla sprawdzania drukowalności danych
+bool isDrowable(void *input, int size)
+{
+    char *buf = (char *)input;
+
+    for (int i = 0; i < size; i++)
+    {
+        if (buf[i] < 32 || buf[i] > 126)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+// Funkcja dla sprawdzania drukowalności pojedynczego znaku
+bool isDrowableChar(const char c)
+{
+    if (c < 32 || c > 126)
+    {
+        return false;
+    }
+    return true;
 }
 
 // Funkcja dla tworzenia i urachamiania klientu
@@ -68,7 +94,11 @@ void startClient(const char *ip, int port)
             perror("Can't read data from server");
             _exit(-1);
         }
-        printf("%c", buff[0]);
+        // Sprawdzanie drukowalności danych
+        if(isDrowableChar(buff[0]))
+        {
+            printf("%c", buff[0]);
+        }
     }
 
     printf("\nTransmission is over.\n");
