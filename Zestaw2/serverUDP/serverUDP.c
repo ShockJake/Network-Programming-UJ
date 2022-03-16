@@ -30,7 +30,7 @@ int createSocket()
     if (result == -1)
     {
         perror("Can't create a socket");
-        _exit(-1);
+        exit(1);
     }
     return result;
 }
@@ -42,9 +42,9 @@ void signal_handler(int signum)
     if (close(sd) == -1)
     {
         perror("Can't close the server");
-	    _exit(-1);
+	    exit(1);
     }
-    _exit(0);
+    exit(0);
 }
 
 // Funkcja dla potwierdzenia połączenia
@@ -86,7 +86,7 @@ void startUDPServer(int port)
     if (bind(sd, (struct sockaddr *)&server_addr, sizeof(server_addr)) == -1)
     {
         perror("Can't bind the socket");
-        _exit(-1);
+        exit(1);
     }
 
     socklen_t len = sizeof(client_addr);
@@ -123,19 +123,19 @@ int main(int argc, char const *argv[])
     {
         printf("You wrote incorrect amount of arguments\n");
         printf("\n*** Usage:\n first argument - port of the server you want to create.\n\n");
-        _exit(0);
+        exit(0);
     }
     // Port na którym gniazdko będzie słuchać i czekać na połączenie
     int port = strtol(argv[1], NULL, 10);
     if (port == 0) // Sprawdzenie czy udała się konwersja na int
     {
         perror("Wrong input");
-        _exit(-1);
+        exit(1);
     }
     if (port < 1024) // Sprawdzenie czy podany port nie jest zamały
     {
         printf("\nGiven port is to small\n");
-        _exit(0);
+        exit(0);
     }
 
     printf("\nStarting UDP server\n");

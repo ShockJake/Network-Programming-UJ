@@ -23,7 +23,7 @@ int createSocket()
     if (result == -1)
     {
         perror("Can't craete socket");
-        _exit(-1);
+        exit(1);
     }
     return result;
 }
@@ -79,7 +79,7 @@ void startClient(const char *ip, int port)
     if (con == -1)
     {
         perror("Can't connect to the server");
-        _exit(-1);
+        exit(1);
     }
 
     printf("\n--- Connected to a server: %s:%d ---\n\n", ip, port);
@@ -92,7 +92,7 @@ void startClient(const char *ip, int port)
         if (byteN == -1)
         {
             perror("Can't read data from server");
-            _exit(-1);
+            exit(1);
         }
         // Sprawdzanie drukowalności danych
         if(isDrowableChar(buff[0]))
@@ -106,7 +106,7 @@ void startClient(const char *ip, int port)
     if (close(csd) == -1)
     {
         perror("Can't close socket");
-        _exit(-1);
+        exit(1);
     }
 }
 
@@ -118,14 +118,14 @@ int main(int argc, char const *argv[])
         printf("You wrote incorrect amount of arguments\n");
         printf("\n*** Usage:\n first argument  - ip of the server\n");
         printf(" second argument - port of the server you want to create.\n\n");
-        _exit(0);
+        exit(0);
     }
     // Port na którym gniazdko będzie słuchać i czekać na połączenie
     int port = strtol(argv[2], NULL, 10);
     if (port == 0) // Sprawdzenie czy udała się konwersja na int
     {
         perror("Wrong input");
-        _exit(-1);
+        exit(1);
     }
 
     startClient(argv[1], port);

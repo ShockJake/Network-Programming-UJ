@@ -18,7 +18,7 @@ int createSocket()
     if (result == -1)
     {
         perror("Can't create a socket");
-        _exit(-1);
+        exit(1);
     }
     return result;
 }
@@ -103,7 +103,7 @@ int main(int argc, char const *argv[])
     if (port == 0) // Sprawdzenie czy udała się konwersja na int
     {
         perror("Wrong input");
-        _exit(-1);
+        exit(1);
     }
 
     printf("\nStarting client:\n");

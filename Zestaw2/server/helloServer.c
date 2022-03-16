@@ -26,7 +26,7 @@ int createSocket()
     if (result == -1) // Sprawdzaine czy udało się
     {
         perror("Can't create a socket");
-        _exit(-1);
+        exit(1);
     }
     return result;
 }
@@ -39,9 +39,9 @@ void sig_handler(int signum)
     if (close(sfd) == -1)
     {
         perror("Can't close server");
-        _exit(-1);
+        exit(1);
     }
-    _exit(0);
+    exit(0);
 }
 
 // Funkcja do tworzenia i startowania serweru
@@ -73,14 +73,14 @@ void startHelloServer(int port)
     if (bind(sfd, addr, sizeof(adres)) == -1)
     {
         perror("Can't bind socket");
-        _exit(-1);
+        exit(1);
     }
 
     // Ustawienie gniazdka na słuchanie
-    if (listen(sfd, 0) == -1)
+    if (listen(sfd, 10) == -1)
     {
         perror("Can't make the socket to listen");
-        _exit(-1);
+        exit(1);
     }
 
     printf("\nServer is created, and listening on this port: %d\n", port);
@@ -93,7 +93,7 @@ void startHelloServer(int port)
         if (acd == -1)
         {
             perror("Can't accept connection");
-            _exit(-1);
+            exit(1);
         }
 
         // Strutrura dla przechowywania danych o połączonym urządzeniu
@@ -101,10 +101,10 @@ void startHelloServer(int port)
         socklen_t lenght = sizeof(_addr);
 
         // Pobieranie imienia połączonego urządzenia
-        if (getsockname(acd, (struct sockaddr *)&_addr, &lenght) == -1)
+        if (getpeername(acd, (struct sockaddr *)&_addr, &lenght) == -1)
         {
             perror("Can't get name of peer");
-            _exit(-1);
+            exit(1);
         }
 
         printf("Connected with: %ld : %d\n", _addr.__ss_align, port);
@@ -124,13 +124,13 @@ void startHelloServer(int port)
         if (close(acd) == -1)
         {
             perror("Can't close the connection");
-            _exit(-1);
+            exit(1);
         }
     }
     if (close(sfd) == -1)
     {
         perror("Can't close server");
-        _exit(-1);
+        exit(1);
     }
 }
 
@@ -143,19 +143,19 @@ int main(int argc, char const *argv[])
     {
         printf("You wrote incorrect amount of arguments\n");
         printf("\n*** Usage:\n first argument - port of the server you want to create.\n\n");
-        _exit(0);
+        exit(0);
     }
     // Port na którym gniazdko będzie słuchać i czekać na połączenie
     int port = strtol(argv[1], NULL, 10);
     if (port == 0) // Sprawdzenie czy udała się konwersja na int
     {
         perror("Wrong input");
-        _exit(-1);
+        exit(1);
     }
     if (port < 1024) // Sprawdzenie czy podany port nie jest zamały
     {
         printf("\nGiven port is to small\n");
-        _exit(0);
+        exit(0);
     }
 
     startHelloServer(port);
