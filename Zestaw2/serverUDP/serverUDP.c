@@ -35,6 +35,21 @@ int createSocket()
     return result;
 }
 
+// Funkcja dla sprawdzania drukowalności danych
+bool isDrowable(void *input, int size)
+{
+    char *buf = (char *)input;
+
+    for (int i = 0; i < size; i++)
+    {
+        if (buf[i] < 32 || buf[i] > 126)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
 // Funkcja dla przechwytu sygnału
 void signal_handler(int signum)
 {
@@ -55,7 +70,10 @@ bool verifyConnection(int sockD, char buf[], socklen_t lenght, struct sockaddr *
     if (n > 0)
     {
         printf("\n-!!!- Connection is established successfully...\n");
-        printf("\nMessage from client: %s", buf);
+        if(isDrowable(buf, n))
+        {
+            printf("\nMessage from client: %s", buf);
+        }
         return true;
     }
     return false;
