@@ -12,7 +12,6 @@
     albo dwa znaki \r\n (bajty 10, 13). Serwer może wtedy, ale nie musi, dodać \r\n do zwracanej odpowiedzi.
 */
 
-
 #include "functions.h"
 
 int main(int argc, char const *argv[])
@@ -20,14 +19,19 @@ int main(int argc, char const *argv[])
     signal(SIGINT, signal_handler);
 
     // Sprawdzanie ilości argumentów
-    if (argc < 2)
+    if (argc < 1)
     {
         printf("You wrote incorrect amount of arguments\n");
-        printf("\n*** Usage:\n first argument - port of the server you want to create.\n\n");
+        printf("\n*** Usage:\n first argument - port of the server you want to create (2020 - used by default).\n\n");
         exit(0);
     }
     // Port na którym gniazdko będzie słuchać i czekać na połączenie
-    int port = strtol(argv[1], NULL, 10);
+    int port = 2020;
+
+    if (argc > 1)
+    {
+        port = strtol(argv[1], NULL, 10);
+    }
     if (port == 0) // Sprawdzenie czy udała się konwersja na int
     {
         perror("Wrong input");
