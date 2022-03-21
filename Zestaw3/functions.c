@@ -67,6 +67,11 @@ int performAction(char *data, int lenght)
         }
 
         number = (int)data[i] - (int)'0';
+
+        if(number > INT_MAX - result)
+        {
+            return -1;
+        }
         result += number;
     }
     return result;
@@ -91,8 +96,9 @@ void startSumServer(int port)
     // result string
     char result_char[4];
 
-    // Error message
+    // Error messages
     char *errorMsg = "\nIncorect data...\n";
+    char *overflowMsg = "\nOverflow...\n";
 
     // Structures for server and client
     struct sockaddr_in server_addr, client_addr;
@@ -131,14 +137,30 @@ void startSumServer(int port)
         }
         else
         {
-            sendto(sd, errorMsg, strlen(errorMsg), MSG_CONFIRM, (struct sockaddr *)&client_addr, len);
+            bytesToSent =  sendto(sd, errorMsg, strlen(errorMsg), MSG_CONFIRM, (struct sockaddr *)&client_addr, len);
+            if(bytesToSent == -1)
+            {
+                perror("Can't send an error");
+                exit(1);
+            }
             printf("\nUnable to read data from client\n");
-
             continue;
         }
 
         // Preapearing the answer from server
         result = performAction(buff, bytesFromClient - 1);
+        if(result == -1)
+        {
+            printf("\nLarge data has come from client and overflow happend");
+            bytesToSent = sendto(sd, overflowMsg, strlen(overflowMsg), MSG_CONFIRM, (struct sockaddr *)&client_addr, len);
+            if(bytesToSent == -1)
+            {
+                perror("Can't send an error");
+                exit(1);
+            }
+            continue;
+        }
+
         printf("\n%d\n", result);
         strcat(answer, "Answer: ");
         sprintf(result_char, "\n%d\n", result);
