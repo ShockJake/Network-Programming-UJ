@@ -37,4 +37,7 @@ int performAction(char *data, int lenght);
 // Function to create and start server
 void startSumServer(int port);
 
+// Function to add a proper ending to the line
+void addEnding(char* data, bool type);
+
 #endif

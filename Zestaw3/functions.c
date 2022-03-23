@@ -77,6 +77,18 @@ int performAction(char *data, int lenght)
     return result;
 }
 
+void addEnding(char *data, bool type)
+{
+    if (type)
+    {
+        strcat(data, "\r\n");
+    }
+    else
+    {
+        strcat(data, "\n");
+    }
+}
+
 void startSumServer(int port)
 {
     // Creating socket
@@ -85,8 +97,12 @@ void startSumServer(int port)
     // Main buffer
     char buff[MAXLINE];
 
-    // Buffer for the server answer (size = 10, because of space that maximum UINT number can have)
-    char answer[10];
+    // Variable for state if incoming message has \r\n in the end of line.
+    bool isRN = false;
+
+    // Buffer for the server answer (size = 12, 
+    // because of space that maximum UINT number can have + space for \r\n)
+    char answer[12];
 
     // bytesFromClient - number of bytes recieved form client
     // bytesToSend - number of byted sent to a client
@@ -94,12 +110,12 @@ void startSumServer(int port)
     int bytesFromClient, bytesToSent, result;
 
     // result in char* type
-    char result_char[4];
+    char result_char[10];
 
     // Error messages
-    char *errorMsg = "\nIncorect data...\n";
-    char *overflowMsg = "\nOverflow...\n";
-    char *convertMsg = "\nServer Problem, convertion faliled...\n";
+    char errorMsg[9] = "\nError";
+    char overflowMsg[15] = "\nOverflow...";
+    char convertMsg[41] = "\nServer Problem, convertion faliled...";
 
     // Structures for server and client
     struct sockaddr_in server_addr, client_addr;
@@ -132,6 +148,12 @@ void startSumServer(int port)
             exit(1);
         }
 
+        // Checking what kind of line ending the incoming message has (\r\n or \n)
+        if (buff[bytesFromClient] == '\n' && buff[bytesFromClient - 1] == '\r')
+        {
+            isRN = true;
+        }
+
         // Checking input if it's readable by server
         if (checkInput(buff, bytesFromClient))
         {
@@ -139,6 +161,8 @@ void startSumServer(int port)
         }
         else
         {
+            addEnding(errorMsg, isRN);
+
             // If not readable informig client
             bytesToSent = sendto(sd, errorMsg, strlen(errorMsg), MSG_CONFIRM, (struct sockaddr *)&client_addr, len);
             if (bytesToSent == -1)
@@ -156,6 +180,9 @@ void startSumServer(int port)
         {
             // If data is too big server informs client that this data prowokes overflow
             printf("\nLarge data has come from client and overflow happend");
+
+            addEnding(overflowMsg, isRN);
+
             bytesToSent = sendto(sd, overflowMsg, strlen(overflowMsg), MSG_CONFIRM, (struct sockaddr *)&client_addr, len);
             if (bytesToSent == -1)
             {
@@ -173,6 +200,9 @@ void startSumServer(int port)
         if (bytesToSent == -1)
         {
             perror("Can't convert data");
+
+            addEnding(convertMsg, isRN);
+
             // Informing client that error occured
             bytesToSent = sendto(sd, convertMsg, strlen(convertMsg), MSG_CONFIRM, (struct sockaddr *)&client_addr, len);
             if (bytesToSent == -1)
@@ -182,18 +212,10 @@ void startSumServer(int port)
             }
             continue;
         }
-        
+
         // Prepearing answer
         strcat(answer, result_char);
-        // Checking what kind of line ending the incoming message has
-        if (buff[bytesFromClient] == '\n' && buff[bytesFromClient - 1] == '\r')
-        {
-            strcat(answer, "\r\n");
-        }
-        else
-        {
-            strcat(answer, "\n");
-        }
+        addEnding(answer, isRN);
 
         // Sending answer
         bytesToSent = sendto(sd, answer, strlen(answer), MSG_CONFIRM, (struct sockaddr *)&client_addr, len);
@@ -206,7 +228,7 @@ void startSumServer(int port)
         }
 
         // Clearing buffors
-        memset(answer, 0, 10);
+        memset(answer, 0, 12);
         memset(buff, 0, MAXLINE);
     }
 }
