@@ -68,7 +68,7 @@ int performAction(char *data, int lenght)
 
         number = (int)data[i] - (int)'0';
 
-        if(number > INT_MAX - result)
+        if (number > INT_MAX - result)
         {
             return -1;
         }
@@ -86,7 +86,7 @@ void startSumServer(int port)
     char buff[MAXLINE];
 
     // Buffer for the server answer
-    char answer[MAXLINE / 4];
+    char answer[MAXLINE / 8];
 
     // State that shows if client system requiers to has \r\n in the end of message
     bool isRN = false;
@@ -133,12 +133,12 @@ void startSumServer(int port)
 
         if (checkInput(buff, bytesFromClient))
         {
-            printf("\nMessage from client: %s\n", buff);
+            printf("\nData from client: %s", buff);
         }
         else
         {
-            bytesToSent =  sendto(sd, errorMsg, strlen(errorMsg), MSG_CONFIRM, (struct sockaddr *)&client_addr, len);
-            if(bytesToSent == -1)
+            bytesToSent = sendto(sd, errorMsg, strlen(errorMsg), MSG_CONFIRM, (struct sockaddr *)&client_addr, len);
+            if (bytesToSent == -1)
             {
                 perror("Can't send an error");
                 exit(1);
@@ -149,11 +149,12 @@ void startSumServer(int port)
 
         // Preapearing the answer from server
         result = performAction(buff, bytesFromClient - 1);
-        if(result == -1)
+        if (result == -1)
         {
+            // If data is too big server informs client that this data prowokes overflow
             printf("\nLarge data has come from client and overflow happend");
             bytesToSent = sendto(sd, overflowMsg, strlen(overflowMsg), MSG_CONFIRM, (struct sockaddr *)&client_addr, len);
-            if(bytesToSent == -1)
+            if (bytesToSent == -1)
             {
                 perror("Can't send an error");
                 exit(1);
@@ -161,9 +162,10 @@ void startSumServer(int port)
             continue;
         }
 
-        printf("\n%d\n", result);
+        // Printing result
+        printf("Result: %d\n", result);
         strcat(answer, "Answer: ");
-        sprintf(result_char, "\n%d\n", result);
+        sprintf(result_char, "%d", result);
         strcat(answer, result_char);
         if (buff[bytesFromClient] == '\n' && buff[bytesFromClient - 1] == '\r')
         {
@@ -185,7 +187,7 @@ void startSumServer(int port)
         }
 
         // Clearing buffors
-        memset(answer, 0,MAXLINE/4);
+        memset(answer, 0, MAXLINE / 8);
         memset(buff, 0, MAXLINE);
     }
 }

@@ -23,7 +23,7 @@ int sd;
 // Function to handle signal
 void signal_handler(int signum);
 
-// Function to craete socket for server
+// Function to create socket for server
 int createSocket();
 
 // Function to check if input is a number
