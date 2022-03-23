@@ -224,5 +224,6 @@ void startSumServer(int port)
         // Clearing buffors
         memset(answer, 0, 12);
         memset(buff, 0, MAXLINE);
+        memset(result_char, 0, 10);
     }
 }
