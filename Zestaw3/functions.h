@@ -15,7 +15,6 @@
 #include <stdint.h>
 
 #define MAXLINE 1024
-#define MAXNUM 5
 
 // Server desckryptor
 int sd;
