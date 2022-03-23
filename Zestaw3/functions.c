@@ -162,7 +162,6 @@ void startSumServer(int port)
         {
             isRN = true;
         }
-
         // Checking input if it's readable by server
         if (checkInput(buff, bytesFromClient))
         {
@@ -171,20 +170,19 @@ void startSumServer(int port)
         else
         {
             addEnding(errorMsg, isRN);
-
+            
             // If not readable informig client
             bytesToSent = sendError(sd, errorMsg, strlen(errorMsg), (struct sockaddr *)&client_addr, len);
             printf("\nUnable to read data from client\n");
             continue;
         }
 
-        // Preapearing the answer from server
+        // Getting result
         result = performAction(buff, bytesFromClient - 1);
         if (result == -1)
         {
             // If data is too big server informs client that this data prowokes overflow
             printf("\nLarge data has come from client and overflow happend");
-
             addEnding(errorMsg, isRN);
 
             bytesToSent = sendError(sd, errorMsg, strlen(errorMsg), (struct sockaddr *)&client_addr, len);
@@ -199,7 +197,6 @@ void startSumServer(int port)
         if (bytesToSent == -1)
         {
             perror("Can't convert data");
-
             addEnding(errorMsg, isRN);
 
             // Informing client that error occured
