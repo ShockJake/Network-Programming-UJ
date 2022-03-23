@@ -85,7 +85,7 @@ void startSumServer(int port)
     // Main buffer
     char buff[MAXLINE];
 
-    // Buffer for the server answer
+    // Buffer for the server answer (size = 10, because of space that maximum UINT number can have)
     char answer[10];
 
     // bytesFromClient - number of bytes recieved form client
