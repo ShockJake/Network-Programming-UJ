@@ -132,7 +132,7 @@ void startSumServer(int port)
     memset(&server_addr, 0, sizeof(server_addr));
     memset(&client_addr, 0, sizeof(client_addr));
 
-    // Compleating server structure
+    // Filling server structure
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = INADDR_ANY;
     server_addr.sin_port = htons(port);
@@ -157,6 +157,17 @@ void startSumServer(int port)
             exit(1);
         }
 
+        // Checking if there is a empty datagram (1 - because of \n character)
+        if (bytesFromClient == 1)
+        {
+            addEnding(errorMsg, isRN);
+
+            // Informing client about error
+            bytesToSent = sendError(sd, errorMsg, strlen(errorMsg), (struct sockaddr *)&client_addr, len);
+            printf("\nUnable to read data from client\n");
+            continue;
+        }
+
         // Checking what kind of line ending the incoming message has (\r\n or \n)
         if (buff[bytesFromClient] == '\n' && buff[bytesFromClient - 1] == '\r')
         {
@@ -170,7 +181,7 @@ void startSumServer(int port)
         else
         {
             addEnding(errorMsg, isRN);
-            
+
             // If not readable informig client
             bytesToSent = sendError(sd, errorMsg, strlen(errorMsg), (struct sockaddr *)&client_addr, len);
             printf("\nUnable to read data from client\n");
