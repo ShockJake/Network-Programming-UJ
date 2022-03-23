@@ -2,6 +2,14 @@
 
 Programs to implement Server takes numbers as input and returns sum of all that numbers
 
+## Compiling
+
+> $ gcc -std=c99 -pedantic -Wall sumServer.c functions.c -o sumServer
+
+## Running
+
+> $ ./sumServer 2020
+
 ## Containment:
 
 - functions.h
