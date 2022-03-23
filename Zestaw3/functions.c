@@ -68,7 +68,7 @@ int performAction(char *data, int lenght)
 
         number = (int)data[i] - (int)'0';
 
-        if (number > INT_MAX - result)
+        if (number > UINT_MAX - result)
         {
             return -1;
         }
@@ -86,19 +86,20 @@ void startSumServer(int port)
     char buff[MAXLINE];
 
     // Buffer for the server answer
-    char answer[MAXLINE / 8];
+    char answer[10];
 
-    // State that shows if client system requiers to has \r\n in the end of message
-    bool isRN = false;
-
+    // bytesFromClient - number of bytes recieved form client
+    // bytesToSend - number of byted sent to a client
+    // result - result of server action
     int bytesFromClient, bytesToSent, result;
 
-    // result string
+    // result in char* type
     char result_char[4];
 
     // Error messages
     char *errorMsg = "\nIncorect data...\n";
     char *overflowMsg = "\nOverflow...\n";
+    char *convertMsg = "\nServer Problem, convertion faliled...\n";
 
     // Structures for server and client
     struct sockaddr_in server_addr, client_addr;
@@ -131,12 +132,14 @@ void startSumServer(int port)
             exit(1);
         }
 
+        // Checking input if it's readable by server
         if (checkInput(buff, bytesFromClient))
         {
             printf("\nData from client: %s", buff);
         }
         else
         {
+            // If not readable informig client
             bytesToSent = sendto(sd, errorMsg, strlen(errorMsg), MSG_CONFIRM, (struct sockaddr *)&client_addr, len);
             if (bytesToSent == -1)
             {
@@ -164,13 +167,14 @@ void startSumServer(int port)
 
         // Printing result
         printf("Result: %d\n", result);
-        strcat(answer, "Answer: ");
+
+        // Converting result from int to char*
         bytesToSent = sprintf(result_char, "%d", result);
         if (bytesToSent == -1)
         {
             perror("Can't convert data");
             // Informing client that error occured
-            bytesToSent = sendto(sd, errorMsg, strlen(errorMsg), MSG_CONFIRM, (struct sockaddr *)&client_addr, len);
+            bytesToSent = sendto(sd, convertMsg, strlen(convertMsg), MSG_CONFIRM, (struct sockaddr *)&client_addr, len);
             if (bytesToSent == -1)
             {
                 perror("Can't send an error");
@@ -179,7 +183,9 @@ void startSumServer(int port)
             continue;
         }
         
+        // Prepearing answer
         strcat(answer, result_char);
+        // Checking what kind of line ending the incoming message has
         if (buff[bytesFromClient] == '\n' && buff[bytesFromClient - 1] == '\r')
         {
             strcat(answer, "\r\n");
@@ -200,7 +206,7 @@ void startSumServer(int port)
         }
 
         // Clearing buffors
-        memset(answer, 0, MAXLINE / 8);
+        memset(answer, 0, 10);
         memset(buff, 0, MAXLINE);
     }
 }
