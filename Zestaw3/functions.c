@@ -89,6 +89,17 @@ void addEnding(char *data, bool type)
     }
 }
 
+int sendError(int sd, char *msg, size_t msg_len, struct sockaddr *clientAddr, socklen_t len)
+{
+    int bytesToSent = sendto(sd, msg, msg_len, MSG_CONFIRM, clientAddr, len);
+    if (bytesToSent == -1)
+    {
+        perror("Can't send an error");
+        exit(1);
+    }
+    return bytesToSent;
+}
+
 void startSumServer(int port)
 {
     // Creating socket
@@ -100,7 +111,7 @@ void startSumServer(int port)
     // Variable for state if incoming message has \r\n in the end of line.
     bool isRN = false;
 
-    // Buffer for the server answer (size = 12, 
+    // Buffer for the server answer (size = 12,
     // because of space that maximum UINT number can have + space for \r\n)
     char answer[12];
 
@@ -113,9 +124,7 @@ void startSumServer(int port)
     char result_char[10];
 
     // Error messages
-    char errorMsg[9] = "\nError";
-    char overflowMsg[15] = "\nOverflow...";
-    char convertMsg[41] = "\nServer Problem, convertion faliled...";
+    char errorMsg[9] = "ERROR";
 
     // Structures for server and client
     struct sockaddr_in server_addr, client_addr;
@@ -164,12 +173,7 @@ void startSumServer(int port)
             addEnding(errorMsg, isRN);
 
             // If not readable informig client
-            bytesToSent = sendto(sd, errorMsg, strlen(errorMsg), MSG_CONFIRM, (struct sockaddr *)&client_addr, len);
-            if (bytesToSent == -1)
-            {
-                perror("Can't send an error");
-                exit(1);
-            }
+            bytesToSent = sendError(sd, errorMsg, strlen(errorMsg), (struct sockaddr *)&client_addr, len);
             printf("\nUnable to read data from client\n");
             continue;
         }
@@ -181,14 +185,9 @@ void startSumServer(int port)
             // If data is too big server informs client that this data prowokes overflow
             printf("\nLarge data has come from client and overflow happend");
 
-            addEnding(overflowMsg, isRN);
+            addEnding(errorMsg, isRN);
 
-            bytesToSent = sendto(sd, overflowMsg, strlen(overflowMsg), MSG_CONFIRM, (struct sockaddr *)&client_addr, len);
-            if (bytesToSent == -1)
-            {
-                perror("Can't send an error");
-                exit(1);
-            }
+            bytesToSent = sendError(sd, errorMsg, strlen(errorMsg), (struct sockaddr *)&client_addr, len);
             continue;
         }
 
@@ -201,15 +200,10 @@ void startSumServer(int port)
         {
             perror("Can't convert data");
 
-            addEnding(convertMsg, isRN);
+            addEnding(errorMsg, isRN);
 
             // Informing client that error occured
-            bytesToSent = sendto(sd, convertMsg, strlen(convertMsg), MSG_CONFIRM, (struct sockaddr *)&client_addr, len);
-            if (bytesToSent == -1)
-            {
-                perror("Can't send an error");
-                exit(1);
-            }
+            bytesToSent = sendError(sd, errorMsg, strlen(errorMsg), (struct sockaddr *)&client_addr, len);
             continue;
         }
 

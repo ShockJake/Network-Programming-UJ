@@ -40,4 +40,7 @@ void startSumServer(int port);
 // Function to add a proper ending to the line
 void addEnding(char* data, bool type);
 
+// Function to send error message to the client
+int sendError(int sd, char* msg, size_t msg_len, struct sockaddr* clientAddr, socklen_t len);
+
 #endif
