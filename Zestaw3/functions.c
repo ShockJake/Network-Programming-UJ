@@ -165,7 +165,20 @@ void startSumServer(int port)
         // Printing result
         printf("Result: %d\n", result);
         strcat(answer, "Answer: ");
-        sprintf(result_char, "%d", result);
+        bytesToSent = sprintf(result_char, "%d", result);
+        if (bytesToSent == -1)
+        {
+            perror("Can't convert data");
+            // Informing client that error occured
+            bytesToSent = sendto(sd, errorMsg, strlen(errorMsg), MSG_CONFIRM, (struct sockaddr *)&client_addr, len);
+            if (bytesToSent == -1)
+            {
+                perror("Can't send an error");
+                exit(1);
+            }
+            continue;
+        }
+        
         strcat(answer, result_char);
         if (buff[bytesFromClient] == '\n' && buff[bytesFromClient - 1] == '\r')
         {
