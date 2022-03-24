@@ -225,6 +225,7 @@ void startSumServer(int port)
         {
             perror("Can't send a message");
         }
+        else
         {
             printf("\n - Answer was sent successfully...\n");
         }
