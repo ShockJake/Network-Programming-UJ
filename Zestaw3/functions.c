@@ -198,7 +198,7 @@ void startSumServer(int port)
         printf("Result: %lld\n", result);
 
         // Converting result from int to char*
-        bytesToSent = sprintf(result_char, "%lld", result);
+        bytesToSent = sprintf(answer, "%lld", result);
         if (bytesToSent == -1)
         {
             perror("Can't convert data");
@@ -208,7 +208,6 @@ void startSumServer(int port)
         }
 
         // Prepearing answer
-        strcat(answer, result_char);
         if (isRN)
         {
             addEnding(answer);
