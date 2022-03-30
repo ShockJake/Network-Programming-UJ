@@ -13,6 +13,7 @@
 #include <sys/signal.h>
 #include <limits.h>
 #include <stdint.h>
+#include <errno.h>
 
 #define MAXLINE 1024
 
@@ -32,7 +33,7 @@ bool isNumber(char input);
 bool checkInput(char *data, int lenght, bool *isRN);
 
 // Server actions
-int performAction(char *data, int lenght);
+unsigned long long int performAction(char *data, int lenght);
 
 // Function to create and start server
 void startSumServer(int port);

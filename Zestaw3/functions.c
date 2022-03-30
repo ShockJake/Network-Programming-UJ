@@ -54,21 +54,20 @@ bool checkInput(char *data, int lenght, bool *isRN)
     return true;
 }
 
-int performAction(char *data, int lenght)
+unsigned long long int performAction(char *data, int lenght)
 {
-    int number = 0;
-    int result = 0;
+    unsigned long long int number = 0;
+    unsigned long long int result = 0;
 
     char *numberStr = strtok(data, " ");
 
     while (numberStr != NULL)
     {
-        if(strlen(numberStr) > 10)
+        number = strtoull(numberStr, NULL, 10);
+        if(number == ULLONG_MAX && errno == ERANGE)
         {
             return -1;
         }
-        number = strtoull(numberStr, NULL, 10);
-
         if (number > INT_MAX - result)
         {
             return -1;
@@ -105,7 +104,7 @@ void startSumServer(int port)
     char buff[MAXLINE];
 
     // Variable for state if incoming message has \r\n in the end of line.
-    bool isRN = false;
+    bool isRN;
 
     // Buffer for the server answer (size = 12,
     // because of space that maximum UINT number can have + space for \r\n)
@@ -114,7 +113,9 @@ void startSumServer(int port)
     // bytesFromClient - number of bytes recieved form client
     // bytesToSend - number of byted sent to a client
     // result - result of server action
-    int bytesFromClient, bytesToSent, result;
+    int bytesFromClient, bytesToSent;
+
+    unsigned long long int result;
 
     // result in char* type
     char result_char[10];
@@ -145,6 +146,13 @@ void startSumServer(int port)
     // Main loop
     while (true)
     {
+
+        // Clearing buffors and variables
+        memset(answer, 0, 12);
+        memset(buff, 0, MAXLINE);
+        memset(result_char, 0, 10);
+        isRN = false;
+
         // Recieving data and checking it
         bytesFromClient = recvfrom(sd, buff, MAXLINE, MSG_WAITALL, (struct sockaddr *)&client_addr, &len);
         if (bytesFromClient == -1)
@@ -153,14 +161,14 @@ void startSumServer(int port)
             exit(1);
         }
 
-        // Checking if there is a empty datagram (1 - because of \n character)
-        if (bytesFromClient == 1)
-        {
-            // Informing client about error
-            bytesToSent = sendError(sd, errorMsg, strlen(errorMsg), (struct sockaddr *)&client_addr, len);
-            printf("\nUnable to read data from client\n");
-            continue;
-        }
+        // // Checking if there is a empty datagram (1 - because of \n character)
+        // if (bytesFromClient == 1)
+        // {
+        //     // Informing client about error
+        //     bytesToSent = sendError(sd, errorMsg, strlen(errorMsg), (struct sockaddr *)&client_addr, len);
+        //     printf("\nUnable to read data from client\n");
+        //     continue;
+        // }
 
         // Checking input if it's readable by server
         if (checkInput(buff, bytesFromClient, &isRN))
@@ -187,10 +195,10 @@ void startSumServer(int port)
         }
 
         // Printing result
-        printf("Result: %d\n", result);
+        printf("Result: %lld\n", result);
 
         // Converting result from int to char*
-        bytesToSent = sprintf(result_char, "%d", result);
+        bytesToSent = sprintf(result_char, "%lld", result);
         if (bytesToSent == -1)
         {
             perror("Can't convert data");
@@ -216,11 +224,5 @@ void startSumServer(int port)
         {
             printf("\n - Answer was sent successfully...\n");
         }
-
-        // Clearing buffors and variables
-        memset(answer, 0, 12);
-        memset(buff, 0, MAXLINE);
-        memset(result_char, 0, 10);
-        isRN = false;
     }
 }
