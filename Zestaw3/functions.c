@@ -161,15 +161,6 @@ void startSumServer(int port)
             exit(1);
         }
 
-        // // Checking if there is a empty datagram (1 - because of \n character)
-        // if (bytesFromClient == 1)
-        // {
-        //     // Informing client about error
-        //     bytesToSent = sendError(sd, errorMsg, strlen(errorMsg), (struct sockaddr *)&client_addr, len);
-        //     printf("\nUnable to read data from client\n");
-        //     continue;
-        // }
-
         // Checking input if it's readable by server
         if (checkInput(buff, bytesFromClient, &isRN))
         {
