@@ -31,7 +31,7 @@ bool isNumber(char input)
     return true;
 }
 
-bool checkInput(char *data, int lenght)
+bool checkInput(char *data, int lenght, bool *isRN)
 {
     for (int i = 0; i < lenght; i++)
     {
@@ -41,6 +41,7 @@ bool checkInput(char *data, int lenght)
         }
         if (data[i] == '\n')
         {
+            *isRN = true;
             continue;
         }
         if (data[i] == '\r')
@@ -59,34 +60,27 @@ int performAction(char *data, int lenght)
 {
     int number = 0;
     int result = 0;
-    for (int i = 0; i < lenght; i++)
-    {
-        if (data[i] == ' ')
-        {
-            continue;
-        }
 
-        number = (int)data[i] - (int)'0';
+    char *numberStr = strtok(data, " ");
+
+    while (numberStr != NULL)
+    {
+        number = strtoull(numberStr, NULL, 10);
 
         if (number > UINT_MAX - result)
         {
             return -1;
         }
         result += number;
+        numberStr = strtok(NULL, " ");
     }
+
     return result;
 }
 
-void addEnding(char *data, bool type)
+void addEnding(char *data)
 {
-    if (type)
-    {
-        strcat(data, "\r\n");
-    }
-    else
-    {
-        strcat(data, "\n");
-    }
+    strcat(data, "\r\n");
 }
 
 int sendError(int sd, char *msg, size_t msg_len, struct sockaddr *clientAddr, socklen_t len)
@@ -160,28 +154,19 @@ void startSumServer(int port)
         // Checking if there is a empty datagram (1 - because of \n character)
         if (bytesFromClient == 1)
         {
-            addEnding(errorMsg, isRN);
-
             // Informing client about error
             bytesToSent = sendError(sd, errorMsg, strlen(errorMsg), (struct sockaddr *)&client_addr, len);
             printf("\nUnable to read data from client\n");
             continue;
         }
 
-        // Checking what kind of line ending the incoming message has (\r\n or \n)
-        if (buff[bytesFromClient] == '\n' && buff[bytesFromClient - 1] == '\r')
-        {
-            isRN = true;
-        }
         // Checking input if it's readable by server
-        if (checkInput(buff, bytesFromClient))
+        if (checkInput(buff, bytesFromClient, &isRN))
         {
             printf("\nData from client: %s", buff);
         }
         else
         {
-            addEnding(errorMsg, isRN);
-
             // If not readable informig client
             bytesToSent = sendError(sd, errorMsg, strlen(errorMsg), (struct sockaddr *)&client_addr, len);
             printf("\nUnable to read data from client\n");
@@ -194,8 +179,6 @@ void startSumServer(int port)
         {
             // If data is too big server informs client that this data prowokes overflow
             printf("\nLarge data has come from client and overflow happend");
-            addEnding(errorMsg, isRN);
-
             bytesToSent = sendError(sd, errorMsg, strlen(errorMsg), (struct sockaddr *)&client_addr, len);
             continue;
         }
@@ -208,8 +191,6 @@ void startSumServer(int port)
         if (bytesToSent == -1)
         {
             perror("Can't convert data");
-            addEnding(errorMsg, isRN);
-
             // Informing client that error occured
             bytesToSent = sendError(sd, errorMsg, strlen(errorMsg), (struct sockaddr *)&client_addr, len);
             continue;
@@ -217,7 +198,12 @@ void startSumServer(int port)
 
         // Prepearing answer
         strcat(answer, result_char);
-        addEnding(answer, isRN);
+        printf("%d\n", isRN);
+
+        if (isRN)
+        {
+            addEnding(answer);
+        }
 
         // Sending answer
         bytesToSent = sendto(sd, answer, strlen(answer), MSG_CONFIRM, (struct sockaddr *)&client_addr, len);

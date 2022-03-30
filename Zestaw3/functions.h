@@ -29,7 +29,7 @@ int createSocket();
 bool isNumber(char input);
 
 // Function to check if input has some different data except from numbers
-bool checkInput(char *data, int lenght);
+bool checkInput(char *data, int lenght, bool *isRN);
 
 // Server actions
 int performAction(char *data, int lenght);
@@ -38,7 +38,7 @@ int performAction(char *data, int lenght);
 void startSumServer(int port);
 
 // Function to add a proper ending to the line
-void addEnding(char* data, bool type);
+void addEnding(char* data);
 
 // Function to send error message to the client
 int sendError(int sd, char* msg, size_t msg_len, struct sockaddr* clientAddr, socklen_t len);
