@@ -212,9 +212,10 @@ void startSumServer(int port)
             printf("\n - Answer was sent successfully...\n");
         }
 
-        // Clearing buffors
+        // Clearing buffors and variables
         memset(answer, 0, 12);
         memset(buff, 0, MAXLINE);
         memset(result_char, 0, 10);
+        isRN = false;
     }
 }
