@@ -198,8 +198,6 @@ void startSumServer(int port)
 
         // Prepearing answer
         strcat(answer, result_char);
-        printf("%d\n", isRN);
-
         if (isRN)
         {
             addEnding(answer);
