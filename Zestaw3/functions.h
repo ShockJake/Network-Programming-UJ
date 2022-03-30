@@ -29,7 +29,7 @@ int createSocket();
 bool isNumber(char input);
 
 // Function to check if input has some different data except from numbers
-bool checkInput(char *data, int lenght, bool *isRN);
+bool checkInput(char *data, int lenght, bool *isRN, bool *hasSpace);
 
 // Server actions
 int performAction(char *data, int lenght);

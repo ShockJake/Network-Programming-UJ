@@ -33,12 +33,13 @@ bool isNumber(char input)
     return true;
 }
 
-bool checkInput(char *data, int lenght, bool *isRN)
+bool checkInput(char *data, int lenght, bool *isRN, bool *hasSpace)
 {
     for (int i = 0; i < lenght; i++)
     {
         if (data[i] == ' ')
         {
+            *hasSpace = true;
             continue;
         }
         if (data[i] == '\n')
@@ -63,9 +64,13 @@ int performAction(char *data, int lenght)
 
     while (numberStr != NULL)
     {
+        if(strlen(numberStr) > 10)
+        {
+            return -1;
+        }
         number = strtoull(numberStr, NULL, 10);
 
-        if (number > UINT_MAX - result)
+        if (number > INT_MAX - result)
         {
             return -1;
         }
@@ -102,6 +107,8 @@ void startSumServer(int port)
 
     // Variable for state if incoming message has \r\n in the end of line.
     bool isRN = false;
+
+    bool hasSpace = false;
 
     // Buffer for the server answer (size = 12,
     // because of space that maximum UINT number can have + space for \r\n)
@@ -159,7 +166,7 @@ void startSumServer(int port)
         }
 
         // Checking input if it's readable by server
-        if (checkInput(buff, bytesFromClient, &isRN))
+        if (checkInput(buff, bytesFromClient, &isRN, &hasSpace))
         {
             printf("\nData from client: %s", buff);
         }
@@ -173,6 +180,7 @@ void startSumServer(int port)
 
         // Getting result
         result = performAction(buff, bytesFromClient - 1);
+
         if (result == -1)
         {
             // If data is too big server informs client that this data prowokes overflow
