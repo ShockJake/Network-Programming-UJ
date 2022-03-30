@@ -33,13 +33,12 @@ bool isNumber(char input)
     return true;
 }
 
-bool checkInput(char *data, int lenght, bool *isRN, bool *hasSpace)
+bool checkInput(char *data, int lenght, bool *isRN)
 {
     for (int i = 0; i < lenght; i++)
     {
         if (data[i] == ' ')
         {
-            *hasSpace = true;
             continue;
         }
         if (data[i] == '\n')
@@ -108,8 +107,6 @@ void startSumServer(int port)
     // Variable for state if incoming message has \r\n in the end of line.
     bool isRN = false;
 
-    bool hasSpace = false;
-
     // Buffer for the server answer (size = 12,
     // because of space that maximum UINT number can have + space for \r\n)
     char answer[12];
@@ -166,7 +163,7 @@ void startSumServer(int port)
         }
 
         // Checking input if it's readable by server
-        if (checkInput(buff, bytesFromClient, &isRN, &hasSpace))
+        if (checkInput(buff, bytesFromClient, &isRN))
         {
             printf("\nData from client: %s", buff);
         }
