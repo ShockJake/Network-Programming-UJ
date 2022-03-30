@@ -13,6 +13,7 @@ void signal_handler(int signum)
 
 int createSocket()
 {
+    // Socket creation with UDP specifications
     int result = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (result == -1)
     {
@@ -24,6 +25,7 @@ int createSocket()
 
 bool isNumber(char input)
 {
+    // Checking if a character is a number
     if (input > 57 || input < 48)
     {
         return false;
@@ -42,10 +44,6 @@ bool checkInput(char *data, int lenght, bool *isRN)
         if (data[i] == '\n')
         {
             *isRN = true;
-            continue;
-        }
-        if (data[i] == '\r')
-        {
             continue;
         }
         if (!isNumber(data[i]))
