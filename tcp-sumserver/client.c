@@ -20,7 +20,7 @@ int createSocket()
 }
 
 // Funkcja dla sprawdzania drukowalności danych
-bool isDrowable(void *input, int size)
+bool isDrawable(void *input, int size)
 {
     char *buf = (char *)input;
 
@@ -35,7 +35,7 @@ bool isDrowable(void *input, int size)
 }
 
 // Funkcja dla sprawdzania drukowalności pojedynczego znaku
-bool isDrowableChar(const char c)
+bool isDrawableChar(const char c)
 {
     if (c < 32 || c > 126)
     {
@@ -48,11 +48,11 @@ bool isDrowableChar(const char c)
 void startClient(const char *ip, int port)
 {
 
-    char qustion[16] = "1 2 3\r\n 2 3 4\r\n";
+    char qustion[16] = "1 2 3\r\n2 3 4\r\n";
 
     // Główny buffor dla danych z serwera
-    char buff[1];
-
+    char buff[1024];
+    memset(buff, 0, sizeof(buff));
     // Ilość opracowanych bajtów
     ssize_t byteN;
 
@@ -80,8 +80,9 @@ void startClient(const char *ip, int port)
 
     printf("Starting transmission...\n\n");
 
+    printf("Sending data:\n%s\n", qustion);
     byteN = write(csd, qustion, sizeof(qustion));
-    if(byteN == -1)
+    if (byteN == -1)
     {
         perror("Can't send data");
         exit(1);
@@ -96,10 +97,7 @@ void startClient(const char *ip, int port)
             exit(1);
         }
         // Sprawdzanie drukowalności danych
-        if(isDrowableChar(buff[0]))
-        {
-            printf("%c", buff[0]);
-        }
+        printf("%s", buff);
     }
 
     printf("\nTransmission is over.\n");

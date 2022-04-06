@@ -77,32 +77,48 @@ unsigned long long int sumNumbers(char *data)
         result += number;
         numberStr = strtok(NULL, " ");
     }
-    printf("Result: %lld\n", result);
     return result;
+}
+
+void sendData(unsigned long long int answer_int, int clientDescriptor)
+{
+    ssize_t byteN;
+    char answer_ch[12];
+    byteN = sprintf(answer_ch, "%lld", answer_int);
+    if (byteN == -1)
+    {
+        perror("Can't convert data");
+        sendError(clientDescriptor);
+        return;
+    }
+    addEnding(answer_ch);
+    printf("Result: %s", answer_ch);
+
+    // Sending answer
+    byteN = write(clientDescriptor, answer_ch, sizeof(answer_ch));
+    if (byteN == -1)
+    {
+        perror("Can't send data");
+    }
+
+    printf("Answer was sent successfully\n\n");
 }
 
 bool performAction(unsigned long long int *number, int cd)
 {
     signed short int space_counter = 0;
-    char input[2];
+    char input[2] = {0, 0};
     char message[1024];
     ssize_t byteN;
 
     memset(message, 0, sizeof(message));
 
-    while (true)
+    while (byteN = read(cd, input, sizeof(input) - 1) != 0)
     {
-        memset(input, 0, sizeof(input));
-
-        byteN = read(cd, input, sizeof(input) - 1);
         if (byteN == -1)
         {
             perror("Can't read data");
             return false;
-        }
-        if (input[0] == '.')
-        {
-            break;
         }
         if (isNumber(input[0]))
         {
@@ -118,7 +134,11 @@ bool performAction(unsigned long long int *number, int cd)
             }
             strcat(message, input);
         }
-        if (input[0] == '\r' || input[0] == '\n')
+        if (input[0] == '\r')
+        {
+            continue;
+        }
+        if (input[0] == '\n')
         {
             printf("Message form the server: %s\n", message);
             space_counter = 0;
@@ -131,7 +151,9 @@ bool performAction(unsigned long long int *number, int cd)
             {
                 return false;
             }
+            sendData(*number, cd);
         }
+        memset(input, 0, sizeof(input));
     }
     return true;
 }
@@ -140,6 +162,8 @@ void startServer(int port)
 {
     // Creating socket
     sd = createSocket();
+
+    bool isActive = true;
 
     // Ilość opracowanych bajtów
     ssize_t byteN;
@@ -187,7 +211,6 @@ void startServer(int port)
     // Main loop
     while (true)
     {
-
         memset(answer_ch, 0, sizeof(answer_ch));
 
         // Accepting connection
@@ -218,29 +241,11 @@ void startServer(int port)
             printf("Connected with: %s:%d\n", client_addres, port);
         }
 
-        if (performAction(&answer_int, clientDescriptor))
-        {
-            byteN = sprintf(answer_ch, "%lld", answer_int);
-            if (byteN == -1)
-            {
-                perror("Can't convert data");
-                sendError(clientDescriptor);
-            }
-            addEnding(answer_ch);
-
-            // Sending answer
-            byteN = write(clientDescriptor, answer_ch, sizeof(answer_ch));
-            if (byteN == -1)
-            {
-                perror("Can't send data");
-            }
-
-            printf("Answer was sent successfully\n");
-        }
-        else
+        if (!performAction(&answer_int, clientDescriptor))
         {
             sendError(clientDescriptor);
         }
+
         printf("Closing connection\n");
         if (close(clientDescriptor) == -1)
         {
