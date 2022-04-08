@@ -1,7 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -38,22 +34,6 @@ void sig_handler(int signum)
         exit(1);
     }
     exit(0);
-}
-
-void sendError(int asd)
-{
-    const char error_msg[8] = "ERROR\r\n";
-    ssize_t byteN = write(asd, error_msg, sizeof(error_msg));
-    if (byteN == -1)
-    {
-        perror("Can't send error");
-        exit(1);
-    }
-}
-
-void addEnding(char *data)
-{
-    strcat(data, "\r\n");
 }
 
 unsigned long long int sumNumbers(char *data)
@@ -100,8 +80,7 @@ void sendData(unsigned long long int answer_int, int clientDescriptor)
     {
         perror("Can't send data");
     }
-
-    printf("Answer was sent successfully\n\n");
+    printf("Answer was sent successfully\n============================\n");
 }
 
 bool performAction(unsigned long long int *number, int cd)
@@ -237,8 +216,8 @@ void startServer(int port)
         const char *client_ip = inet_ntop(AF_INET, &(_addr.sin_addr), client_addres, INET_ADDRSTRLEN);
         if (client_ip != NULL)
         {
-            printf("---------------------------\n");
-            printf("Connected with: %s:%d\n", client_addres, port);
+            printf("------------------------------\n");
+            printf("Connected with: %s:%d\n\n", client_addres, port);
         }
 
         if (!performAction(&answer_int, clientDescriptor))
@@ -252,7 +231,7 @@ void startServer(int port)
             perror("Can't close the connection");
             exit(1);
         }
-        printf("---------------------------\n");
+        printf("------------------------------\n");
     }
     if (close(sd) == -1)
     {
