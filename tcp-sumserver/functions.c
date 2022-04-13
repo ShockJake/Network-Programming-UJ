@@ -127,6 +127,7 @@ bool performAction(unsigned long long int *number, int cd)
 
     memset(message, 0, sizeof(message));
 
+    // Reading data from client
     while ((byteN = read(cd, input, sizeof(input) - 1)) != 0)
     {
         if (byteN == -1)
@@ -142,12 +143,17 @@ bool performAction(unsigned long long int *number, int cd)
         if (input[0] == ' ')
         {
             space_counter++;
-            if (space_counter > 1)
+            if (space_counter > 1 || (strlen(message) == 0))
             {
                 return false;
             }
             strcat(message, input);
         }
+        if (input[0] == '\n' && space_counter > 0)
+        {
+            return false;
+        }
+        
         if (input[0] == '\r')
         {
             continue;
