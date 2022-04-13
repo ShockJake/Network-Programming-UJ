@@ -204,3 +204,17 @@ void showNewClient(int client_descriptor, char *client_addres, int port)
         printf("Connected with: %s:%d|\ndescriptor number: %i\n\n", client_addres, port, client_descriptor);
     }
 }
+
+int setTimeout(int socket)
+{
+    struct timeval timeout;
+    timeout.tv_sec = 10;
+    timeout.tv_usec = 0.0;
+    int result = setsockopt(socket, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+    if (result == -1)
+    {
+        perror("Can't set timeout");
+        return -1;
+    }
+    return result;
+}

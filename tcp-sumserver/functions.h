@@ -37,5 +37,7 @@ void sendData(unsigned long long int answer_int, int clientDescriptor);
 bool performAction(unsigned long long int *number, int cd);
 // Function to show addres of new client that is connected
 void showNewClient(int cliend_descriptor, char* client_addres, int port);
+// Set timeout
+int setTimeout(int socket);
 
 #endif // FUNCTIONS_H

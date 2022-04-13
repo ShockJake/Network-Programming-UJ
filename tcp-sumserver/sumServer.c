@@ -88,7 +88,12 @@ void client_handler(int port, int sd)
         *descriptor_ptr = client_descriptor;
         
         showNewClient(client_descriptor, client_addres, port);
-
+        int timeout = setTimeout(client_descriptor);
+        if(timeout == -1)
+        {
+            cleanup_attr(&attr);
+            break;
+        }
         pthread_t thr;
         // Creating thread for new client and passing client function to this thread
         errnum = pthread_create(&thr, &attr, client_thread, descriptor_ptr);
