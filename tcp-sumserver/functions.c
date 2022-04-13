@@ -148,7 +148,8 @@ bool performAction(unsigned long long int *number, int cd)
         }
         if (input[0] == '\n')
         {
-            printf("Message form the client %i: %s\n", cd, message);
+            printf("============================\n");
+            printf("Message form the client - %i:\n:: %s\n", cd, message);
             space_counter = 0;
             *number = sumNumbers(message);
 
@@ -176,14 +177,14 @@ int closeConnection(int con)
     return num;
 }
 
-void showNewClient(int clientDescriptor, char* client_addres, int port)
+void showNewClient(int client_descriptor, char* client_addres, int port)
 {
     // Strutrura dla przechowywania danych o połączonym urządzeniu
     struct sockaddr_in _addr;
     socklen_t lenght = sizeof(_addr);
 
     // Getting name of client
-    if (getpeername(clientDescriptor, (struct sockaddr *)&_addr, &lenght) == -1)
+    if (getpeername(client_descriptor, (struct sockaddr *)&_addr, &lenght) == -1)
     {
         perror("Can't get name of peer");
         exit(1);
@@ -193,7 +194,7 @@ void showNewClient(int clientDescriptor, char* client_addres, int port)
     const char *client_ip = inet_ntop(AF_INET, &(_addr.sin_addr), client_addres, INET_ADDRSTRLEN);
     if (client_ip != NULL)
     {
-        printf("------------------------------\n");
-        printf("Connected with: %s:%d\n\n", client_addres, port);
+        printf("-------------------------------\n");
+        printf("Connected with: %s:%d|descriptor number: %i\n\n", client_addres, port, client_descriptor);
     }
 }
