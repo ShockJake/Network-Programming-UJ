@@ -185,7 +185,7 @@ int closeConnection(int con)
 
 void showNewClient(int client_descriptor, char *client_addres, int port)
 {
-    // Strutrura dla przechowywania danych o połączonym urządzeniu
+    // Structure for holding informations about client
     struct sockaddr_in _addr;
     socklen_t lenght = sizeof(_addr);
 
@@ -196,7 +196,7 @@ void showNewClient(int client_descriptor, char *client_addres, int port)
         exit(1);
     }
 
-    // Converting ip from binary to text
+    // Converting ip from binary to text and showing it's addres
     const char *client_ip = inet_ntop(AF_INET, &(_addr.sin_addr), client_addres, INET_ADDRSTRLEN);
     if (client_ip != NULL)
     {
@@ -207,9 +207,12 @@ void showNewClient(int client_descriptor, char *client_addres, int port)
 
 int setTimeout(int socket)
 {
+    // Structure for timeout specification
     struct timeval timeout;
-    timeout.tv_sec = 10;
+    timeout.tv_sec = 20;
     timeout.tv_usec = 0.0;
+
+    // Setting timeout for the client
     int result = setsockopt(socket, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
     if (result == -1)
     {

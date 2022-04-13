@@ -7,3 +7,5 @@ Zestaw3/sumServer
 Zestaw3/result.txt
 tcp-sumserver/.vscode/settings.json
 tcp-sumserver/.vscode/tasks.json
+tcp-sumserver/sumServer
+tcp-sumserver/client
