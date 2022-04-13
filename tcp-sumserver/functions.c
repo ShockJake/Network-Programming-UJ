@@ -29,8 +29,8 @@ void addEnding(char *data)
 int createSocket(int port)
 {
     // Socket creation with TCP specifications
-    int sd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (sd == -1)
+    int server_descriptor = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (server_descriptor == -1)
     {
         perror("Can't create socket");
         exit(1);
@@ -49,20 +49,20 @@ int createSocket(int port)
     const struct sockaddr *addr = (const struct sockaddr *)&addres;
 
     // Bining socket
-    if (bind(sd, addr, sizeof(addres)) == -1)
+    if (bind(server_descriptor, addr, sizeof(addres)) == -1)
     {
         perror("Can't bind socket");
         exit(1);
     }
 
     // Making socket to listen
-    if (listen(sd, 10) == -1)
+    if (listen(server_descriptor, 10) == -1)
     {
         perror("Can't make the socket to listen");
         exit(1);
     }
 
-    return sd;
+    return server_descriptor;
 }
 
 unsigned long long int sumNumbers(char *data)
@@ -70,10 +70,11 @@ unsigned long long int sumNumbers(char *data)
     unsigned long long int number = 0;
     unsigned long long int result = 0;
 
+    // Separating buffer to tokens
     char *numberStr = strtok(data, " ");
     while (numberStr != NULL)
     {
-
+        // Converting char* -> unsigned long long int
         number = strtoull(numberStr, NULL, 10);
         if (number == ULLONG_MAX && errno == ERANGE)
         {
@@ -84,6 +85,7 @@ unsigned long long int sumNumbers(char *data)
             return -1;
         }
         result += number;
+        // Moving througth the buffer
         numberStr = strtok(NULL, " ");
     }
     return result;
@@ -93,6 +95,7 @@ void sendData(unsigned long long int answer_int, int clientDescriptor)
 {
     ssize_t byteN;
     char answer_ch[12];
+    // Converting char* -> unsigned long long int
     byteN = sprintf(answer_ch, "%lld", answer_int);
     if (byteN == -1)
     {
@@ -103,8 +106,11 @@ void sendData(unsigned long long int answer_int, int clientDescriptor)
     addEnding(answer_ch);
     printf("Result: %s", answer_ch);
 
+    // Lenght of answer
+    int lenght = strlen(answer_ch);
+
     // Sending answer
-    byteN = write(clientDescriptor, answer_ch, sizeof(answer_ch));
+    byteN = write(clientDescriptor, answer_ch, lenght);
     if (byteN == -1)
     {
         perror("Can't send data");
@@ -177,7 +183,7 @@ int closeConnection(int con)
     return num;
 }
 
-void showNewClient(int client_descriptor, char* client_addres, int port)
+void showNewClient(int client_descriptor, char *client_addres, int port)
 {
     // Strutrura dla przechowywania danych o połączonym urządzeniu
     struct sockaddr_in _addr;
@@ -195,6 +201,6 @@ void showNewClient(int client_descriptor, char* client_addres, int port)
     if (client_ip != NULL)
     {
         printf("-------------------------------\n");
-        printf("Connected with: %s:%d|descriptor number: %i\n\n", client_addres, port, client_descriptor);
+        printf("Connected with: %s:%d|\ndescriptor number: %i\n\n", client_addres, port, client_descriptor);
     }
 }

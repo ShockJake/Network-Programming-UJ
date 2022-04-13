@@ -48,7 +48,7 @@ bool isDrawableChar(const char c)
 void startClient(const char *ip, int port)
 {
 
-    char qustion[28] = "12 23 34\n23 34 45\n34 45 56\n";
+    char qustion[28] = "12 23 34\n23 34 45\n34 45 5\n";
 
     // Główny buffor dla danych z serwera
     char buff[1024];
@@ -88,6 +88,7 @@ void startClient(const char *ip, int port)
         exit(1);
     }
 
+
     // Odczyt danych z serwera
     while ((byteN = read(csd, buff, sizeof(buff))) != 0)
     {
@@ -97,15 +98,18 @@ void startClient(const char *ip, int port)
             exit(1);
         }
         // Sprawdzanie drukowalności danych
-        printf("Server answer: %s", buff);
+        printf("Server answers:\n");
+        for (int i = 0; i < byteN; i++)
+        {
+            printf("%c", buff[i]);
+        }
+        printf("\n");
+        // if (isDrawable(buff, byteN))
+        // {
+        // }
         memset(buff, 0, sizeof(buff));
-    }
 
-    byteN = read(csd, buff, sizeof(buff));
-    if (byteN == -1)
-    {
-        perror("Can't read data from server");
-        exit(1);
+        break;
     }
 
     printf("\nTransmission is over.\n");
