@@ -1,8 +1,8 @@
 CC = gcc
-CFLAGS = -pedantic -Wall
+CFLAGS = -pedantic -Wall -pthread
 
 all:
-	$(CC) sumServer.c -o sumServer functions.c
+	$(CC) $(CFLAGS) sumServer.c -o sumServer functions.c
 
 .PHONY:
 	clear

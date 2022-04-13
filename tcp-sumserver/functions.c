@@ -28,7 +28,7 @@ void addEnding(char *data)
 
 int createSocket(int port)
 {
-    // Socket creation with UDP specifications
+    // Socket creation with TCP specifications
     int sd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (sd == -1)
     {
@@ -121,7 +121,7 @@ bool performAction(unsigned long long int *number, int cd)
 
     memset(message, 0, sizeof(message));
 
-    while (byteN = read(cd, input, sizeof(input) - 1) != 0)
+    while ((byteN = read(cd, input, sizeof(input) - 1)) != 0)
     {
         if (byteN == -1)
         {
@@ -148,7 +148,7 @@ bool performAction(unsigned long long int *number, int cd)
         }
         if (input[0] == '\n')
         {
-            printf("Message form the server: %s\n", message);
+            printf("Message form the client %i: %s\n", cd, message);
             space_counter = 0;
             *number = sumNumbers(message);
 
@@ -164,4 +164,36 @@ bool performAction(unsigned long long int *number, int cd)
         memset(input, 0, sizeof(input));
     }
     return true;
+}
+
+int closeConnection(int con)
+{
+    int num = close(con);
+    if (num == -1)
+    {
+        perror("Can't close the connection");
+    }
+    return num;
+}
+
+void showNewClient(int clientDescriptor, char* client_addres, int port)
+{
+    // Strutrura dla przechowywania danych o połączonym urządzeniu
+    struct sockaddr_in _addr;
+    socklen_t lenght = sizeof(_addr);
+
+    // Getting name of client
+    if (getpeername(clientDescriptor, (struct sockaddr *)&_addr, &lenght) == -1)
+    {
+        perror("Can't get name of peer");
+        exit(1);
+    }
+
+    // Converting ip from binary to text
+    const char *client_ip = inet_ntop(AF_INET, &(_addr.sin_addr), client_addres, INET_ADDRSTRLEN);
+    if (client_ip != NULL)
+    {
+        printf("------------------------------\n");
+        printf("Connected with: %s:%d\n\n", client_addres, port);
+    }
 }

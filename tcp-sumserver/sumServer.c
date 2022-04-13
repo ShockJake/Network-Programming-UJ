@@ -1,14 +1,14 @@
 #include "functions.h"
 
 // Socket descriptor
-int sd;
+int server_descriptor;
 
-// Function to close socket
+// Function to close server
 void sig_handler(int signum)
 {
     sleep(1);
     printf("\nClosing server...\n");
-    if (close(sd) == -1)
+    if (close(server_descriptor) == -1)
     {
         perror("Can't close server");
         exit(1);
@@ -16,81 +16,99 @@ void sig_handler(int signum)
     exit(0);
 }
 
-void startServer(int port)
+// Function for clients
+void *client_thread(void *arg)
 {
-    // Creating socket
-    sd = createSocket(port);
+    int s = *((int *)arg);
 
-    bool isActive = true;
+    unsigned long long int number;
+    if (!performAction(&number, s))
+    {
+        sendError(s);
+    }
+    printf("Closing connection with %i\n", s);
+    closeConnection(s);
+    printf("------------------------------\n");
+    free(arg);
+    return NULL;
+}
 
-    // Ilość opracowanych bajtów
-    ssize_t byteN;
+// Function for cleaning if there was some failure
+void cleanup_attr(pthread_attr_t *attr)
+{
+    // Destroying thread
+    int errnum = pthread_attr_destroy(attr);
+    if (errnum != 0)
+    {
+        printf("Can't destroy thread\n");
+    }
+}
 
-    // Accepted socket descriptor
-    int clientDescriptor;
+void client_handler(int port, int sd)
+{
+    // Thread attributes
+    pthread_attr_t attr;
+    int errnum;
 
     // Addres of client
     char client_addres[INET_ADDRSTRLEN];
 
-    // Number for sending
-    unsigned long long int answer_int = 0;
-
-    // Number for sending in char* type
-    char answer_ch[12];
-
-    printf("\nServer is created, and listening on this port: %d\n", port);
+    // Thread attributes initialization
+    errnum = pthread_attr_init(&attr);
+    if (errnum != 0)
+    {
+        printf("Can't initialize thread\n");
+        return;
+    }
+    // Setting detach state of new thread 
+    errnum = pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    if (errnum != 0)
+    {
+        printf("Can't detachstate thread\n");
+        cleanup_attr(&attr);
+    }
 
     // Main loop
     while (true)
     {
-        memset(answer_ch, 0, sizeof(answer_ch));
-
-        // Accepting connection
-        clientDescriptor = accept(sd, NULL, 0);
-        if (clientDescriptor == -1)
+        // Accepting new client
+        int client_descriptor = accept(sd, NULL, 0);
+        if (client_descriptor == -1)
         {
-            perror("Can't accept connection");
-            exit(1);
+            break;
         }
-
-        // Strutrura dla przechowywania danych o połączonym urządzeniu
-        struct sockaddr_in _addr;
-
-        socklen_t lenght = sizeof(_addr);
-
-        // Getting name of client
-        if (getpeername(clientDescriptor, (struct sockaddr *)&_addr, &lenght) == -1)
+        // Allocating memory to the descriptor pointer
+        int *descriptor_ptr = (int *)malloc(sizeof(int));
+        if (descriptor_ptr == NULL)
         {
-            perror("Can't get name of peer");
-            exit(1);
+            printf("Can't allocate memory to thread argument\n");
+            cleanup_attr(&attr);
+            break;
         }
+        *descriptor_ptr = client_descriptor;
+        
+        showNewClient(client_descriptor, client_addres, port);
 
-        // Converting ip from binary to text
-        const char *client_ip = inet_ntop(AF_INET, &(_addr.sin_addr), client_addres, INET_ADDRSTRLEN);
-        if (client_ip != NULL)
+        pthread_t thr;
+        // Creating thread for new client and passing client function to this thread
+        errnum = pthread_create(&thr, &attr, client_thread, descriptor_ptr);
+        if (errnum != 0)
         {
-            printf("------------------------------\n");
-            printf("Connected with: %s:%d\n\n", client_addres, port);
+            printf("Creating thread failure\n");
+            closeConnection(client_descriptor);
         }
-
-        if (!performAction(&answer_int, clientDescriptor))
-        {
-            sendError(clientDescriptor);
-        }
-
-        printf("Closing connection\n");
-        if (close(clientDescriptor) == -1)
-        {
-            perror("Can't close the connection");
-            exit(1);
-        }
-        printf("------------------------------\n");
     }
-    if (close(sd) == -1)
-    {
-        perror("Can't close server");
-        exit(1);
-    }
+}
+
+void startServer(int port)
+{
+    // Creating socket
+    server_descriptor = createSocket(port);
+
+    printf("\nServer is created, and listening on this port: %d\n", port);
+
+    // Starting handling clients
+    client_handler(port, server_descriptor);
 }
 
 int main(int argc, char const *argv[])
