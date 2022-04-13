@@ -13,6 +13,7 @@ bool isNumber(char input)
 void sendError(int asd)
 {
     const char error_msg[8] = "ERROR\r\n";
+    // Sending error to the client
     ssize_t byteN = write(asd, error_msg, sizeof(error_msg));
     if (byteN == -1)
     {
@@ -138,22 +139,24 @@ bool performAction(unsigned long long int *number, int cd)
         if (isNumber(input[0]))
         {
             space_counter = 0;
+            // Adding number to the question
             strncat(message, input, 1);
         }
         if (input[0] == ' ')
         {
+            // Increasing space counter to check in the future wheather there are more than one spaces
             space_counter++;
             if (space_counter > 1 || (strlen(message) == 0))
             {
                 return false;
             }
+            // Adding space to the question
             strcat(message, input);
         }
         if (input[0] == '\n' && space_counter > 0)
         {
             return false;
         }
-        
         if (input[0] == '\r')
         {
             continue;
@@ -162,16 +165,20 @@ bool performAction(unsigned long long int *number, int cd)
         {
             printf("============================\n");
             printf("Message form the client - %i:\n:: %s\n", cd, message);
+            // Assigning space counter to zero because it's the end of client's question
             space_counter = 0;
+            // Summing numbers that have come from the client
             *number = sumNumbers(message);
 
             memset(input, 0, sizeof(input));
             memset(message, 0, sizeof(message));
 
+            // Checking error occurances
             if (*number == -1 || *number == 0)
             {
                 return false;
             }
+            // Sending data to the client
             sendData(*number, cd);
         }
         memset(input, 0, sizeof(input));
