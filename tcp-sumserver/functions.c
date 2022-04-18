@@ -52,6 +52,11 @@ int createSocket(int port)
     // Bining socket
     if (bind(server_descriptor, addr, sizeof(addres)) == -1)
     {
+        if (close(server_descriptor) == -1)
+        {
+            perror("Can't close server");
+            exit(1);
+        }
         perror("Can't bind socket");
         exit(1);
     }
@@ -59,6 +64,11 @@ int createSocket(int port)
     // Making socket to listen
     if (listen(server_descriptor, 10) == -1)
     {
+        if (close(server_descriptor) == -1)
+        {
+            perror("Can't close server");
+            exit(1);
+        }
         perror("Can't make the socket to listen");
         exit(1);
     }

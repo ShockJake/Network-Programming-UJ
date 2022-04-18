@@ -99,7 +99,7 @@ void client_handler(int port, int sd)
         errnum = pthread_create(&thr, &attr, client_thread, descriptor_ptr);
         if (errnum != 0)
         {
-            printf("Creating thread failure\n");
+            perror("Can't create a thread");
             closeConnection(client_descriptor);
         }
     }
