@@ -20,7 +20,7 @@
 #include <limits.h>
 
 // Function to check if the charactes represents number
-bool isNumber(char input);
+bool isNumber(char input, unsigned short int *space_counter);
 // Function to send an error to the client
 void sendError(int asd);
 // Function to add "\r\n" at the end of message
@@ -33,10 +33,12 @@ int closeConnection(int con);
 unsigned long long int sumNumbers(char *data);
 // Function to send answer from server to client
 void sendData(unsigned long long int answer_int, int clientDescriptor);
+// Function to verify that given data is accteptable by a server
+bool checkData(char *message);
 // Function to communicate with client
 bool performAction(unsigned long long int *number, int cd);
 // Function to show addres of new client that is connected
-void showNewClient(int cliend_descriptor, char* client_addres, int port);
+void showNewClient(int cliend_descriptor, char *client_addres, int port);
 // Set timeout
 int setTimeout(int socket);
 

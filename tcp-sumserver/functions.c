@@ -1,18 +1,32 @@
 #include "functions.h"
 
-bool isNumber(char input)
+bool isNumber(char input, unsigned short int *space_counter)
 {
-    // Checking if a character is a number
-    if (input > 57 || input < 48)
+    if (input == ' ')
     {
-        return false;
+        // printf("[+] Detected space = %i\n", *space_counter);
+        *space_counter += 1;
+        return true;
     }
-    return true;
+
+    if (input == '\r' || input == '\n')
+    {
+        return true;
+    }
+
+    // Checking if a character is a number
+    if (input < 58 && input > 47)
+    {
+        // printf("[+] Detected number %c(%i), spaces = %i\n", input, (int)input, *space_counter);
+        *space_counter = 0;
+        return true;
+    }
+    return false;
 }
 
 void sendError(int asd)
 {
-    const char error_msg[8] = "ERROR\r\n";
+    const char error_msg[7] = "ERROR\r\n";
     // Sending error to the client
     ssize_t byteN = write(asd, error_msg, sizeof(error_msg));
     if (byteN == -1)
@@ -129,13 +143,70 @@ void sendData(unsigned long long int answer_int, int clientDescriptor)
     printf("Answer was sent successfully\n============================\n");
 }
 
+bool checkData(char *message)
+{
+    unsigned short int space_counter = 0;
+
+    // Variable to check if the message has \r in it
+    bool hasR = false;
+
+    unsigned short int lenght = strlen(message);
+    if (lenght <= 0)
+    {
+        return false;
+    }
+
+    // printf("[+] Checking data: %s| with lenght: %i\n", message, lenght);
+
+    // Checking data
+    for (int i = 0; i < lenght; i++)
+    {
+        if (isNumber(message[i], &space_counter))
+        {
+            if (space_counter >= 2)
+            {
+                printf("[-] To many spaces: %i\n", space_counter);
+                return false;
+            }
+        }
+        if (!isNumber(message[i], &space_counter))
+        {
+            printf("[-] Wrong data: %i : %i\n", (int)message[i], i);
+            return false;
+        }
+        if (message[i] == '\n' && space_counter > 0)
+        {
+            printf("[-n] To many spaces: %i\n", space_counter);
+            return false;
+        }
+        if (message[i] == '\r')
+        {
+            hasR = true;
+            continue;
+        }
+        // if (message[i] == '\n' && !hasR)
+        // {
+        //     printf("[-] Lack of \\r character\n");
+        //     return false;
+        // }
+        if (message[i] == '\n')
+        {
+            if (message[0] == ' ' || message[i - 2] == ' ')
+            {
+                printf("[-] Space in the begining or in the end of message\n");
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 bool performAction(unsigned long long int *number, int cd)
 {
-    signed short int space_counter = 0;
+    // unsigned short int space_counter = 0;
     char input[2] = {0, 0};
     char message[1024];
     ssize_t byteN;
-
     memset(message, 0, sizeof(message));
 
     // Reading data from client
@@ -146,52 +217,28 @@ bool performAction(unsigned long long int *number, int cd)
             perror("Can't read data");
             return false;
         }
-        if (isNumber(input[0]))
-        {
-            space_counter = 0;
-            // Adding number to the question
-            strncat(message, input, 1);
-        }
-        if (input[0] == ' ')
-        {
-            // Increasing space counter to check in the future wheather there are more than one spaces
-            space_counter++;
-            if (space_counter > 1 || (strlen(message) == 0))
-            {
-                return false;
-            }
-            // Adding space to the question
-            strcat(message, input);
-        }
-        if (input[0] == '\n' && space_counter > 0)
-        {
-            return false;
-        }
-        if (input[0] == '\r')
-        {
-            continue;
-        }
+        strncat(message, input, 1);
         if (input[0] == '\n')
         {
             printf("============================\n");
             printf("Message form the client - %i:\n:: %s\n", cd, message);
-            // Assigning space counter to zero because it's the end of client's question
-            space_counter = 0;
-            // Summing numbers that have come from the client
-            *number = sumNumbers(message);
-
-            memset(input, 0, sizeof(input));
-            memset(message, 0, sizeof(message));
-
-            // Checking error occurances
-            if (*number == -1 || *number == 0)
+            if (!checkData(message))
             {
-                return false;
+                printf("Sending error...\n");
+                // Sending errors
+                sendError(cd);
             }
-            // Sending data to the client
-            sendData(*number, cd);
+            else
+            {
+                // summing numbers
+                *number = sumNumbers(message);
+
+                // Sending data to the client
+                sendData(*number, cd);
+            }
+            memset(input, 0, sizeof(input));
+            memset(message, 0, sizeof(input));
         }
-        memset(input, 0, sizeof(input));
     }
     return true;
 }
