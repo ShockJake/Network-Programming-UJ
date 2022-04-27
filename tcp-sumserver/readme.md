@@ -24,6 +24,10 @@ Programs to implement Server takes numbers as input and returns sum of all that 
 By default port is set on 2020, but you can provide a specific port 
 (note: if you want to provide a specific port, it must be higher than 1024).
 
+## Running client
+
+> $ ./client >ip< >port<
+
 ## Containment:
 
 - functions.h
