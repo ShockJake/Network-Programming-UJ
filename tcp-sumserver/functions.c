@@ -184,11 +184,11 @@ bool checkData(char *message)
             hasR = true;
             continue;
         }
-        // if (message[i] == '\n' && !hasR)
-        // {
-        //     printf("[-] Lack of \\r character\n");
-        //     return false;
-        // }
+        if (message[i] == '\n' && !hasR)
+        {
+            printf("[-] Lack of \\r character\n");
+            return false;
+        }
         if (message[i] == '\n')
         {
             if (message[0] == ' ' || message[i - 2] == ' ')
