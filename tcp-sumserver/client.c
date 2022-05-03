@@ -48,7 +48,7 @@ bool isDrawableChar(const char c)
 void startClient(const char *ip, int port)
 {
 
-    char qustion[28] = "12 23 34\n23 34 45\n34 45 5\n";
+    char question[9] = "2 2\r2 2\r\n";
 
     // Główny buffor dla danych z serwera
     char buff[1024];
@@ -80,8 +80,8 @@ void startClient(const char *ip, int port)
 
     printf("Starting transmission...\n\n");
 
-    printf("Sending data:\n%s\n", qustion);
-    byteN = write(csd, qustion, sizeof(qustion));
+    printf("Sending data:\n%s\n", question);
+    byteN = write(csd, question, sizeof(question));
     if (byteN == -1)
     {
         perror("Can't send data");
