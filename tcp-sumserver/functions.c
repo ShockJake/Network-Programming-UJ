@@ -182,6 +182,7 @@ bool checkData(char *message)
         if (message[i] == '\r')
         {
             hasR = true;
+            message[i] = ' ';
             continue;
         }
         if (message[i] == '\n' && !hasR)
