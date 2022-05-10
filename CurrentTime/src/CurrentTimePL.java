@@ -17,7 +17,7 @@ public class CurrentTimePL {
 
     private static void printUsage() {
         System.out.println("Usage:");
-        System.out.println("./java CurrentTime < -o > < -d >");
+        System.out.println("./java -cp jsoup-1.14.3.jar:. CurrentTime '-o' '-d'");
         System.out.println("\t* -o - Old search flag (using manual search)");
         System.out.println("\t* -d - Debug mode flag\n");
     }
@@ -95,6 +95,7 @@ public class CurrentTimePL {
                 String time = line.substring(startIndex + 21, startIndex + 29);
                 System.out.println("Current time: " + time);
                 phraseIsFound = true;
+                break;
             }
         }
         bufferedReader.close();
