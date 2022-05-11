@@ -106,14 +106,25 @@ public class CurrentTimePL {
     }
 
     // Method for getting time from web page using Jsoup
-    private static void getCurrentTimeNew() throws IOException {
+    private static void getCurrentTimeNew(HttpURLConnection connection) throws IOException {
+
+        // Getting page content with safe connection
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        StringBuilder pageContent = new StringBuilder();
+        String line;
+
+        while ((line = bufferedReader.readLine()) != null) {
+            pageContent.append(line);
+        }
+
         // Parsing html document with Jsoup
-        Document document = Jsoup.connect(CurrentTimePL.pageUrl).get();
+        Document document = Jsoup.parse(pageContent);
         // Getting element that has time value
         Element element = document.getElementById("ct");
         if (element != null) {
             System.out.println("Current time: " + element.text());
         }
+        bufferedReader.close();
     }
 
     public static void main(String[] args) {
