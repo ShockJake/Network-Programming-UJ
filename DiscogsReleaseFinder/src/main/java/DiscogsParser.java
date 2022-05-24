@@ -8,6 +8,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class DiscogsParser {
     // Token for the discogs page
@@ -40,10 +43,20 @@ public class DiscogsParser {
         while ((line = reader.readLine()) != null) {
             builder.append(line);
         }
+        reader.close();
         return builder.toString();
     }
 
-    private static String parseResponse(String file, String artist) throws ParseException {
+    private static String sortReleases(Map<Integer, String> releases) {
+        Map<Integer, String> treeMap = new TreeMap<>(releases);
+        StringBuilder builder = new StringBuilder();
+        for (Integer i: treeMap.keySet()) {
+            builder.append('\t').append(treeMap.get(i)).append(" ").append(i).append('\n');
+        }
+        return builder.toString();
+    }
+
+    private static String checkArtist(String artist) {
         String artistWithUL = "";
         if (artist.charAt(0) > 96 && artist.charAt(0) < 122) {
             artistWithUL += Character.toUpperCase(artist.charAt(0));    // If first letter of provided artist was in
@@ -51,19 +64,27 @@ public class DiscogsParser {
         } else {                                                        // to perform search in result, otherwise just
             artistWithUL = artist;                                      // passing given artist name value.
         }
-        JSONObject object = (JSONObject) new JSONParser().parse(file);  // Parsing response as a JSONObject
-        JSONArray array = (JSONArray) object.get("results");            // Parsing results from it as a JSONArray
-        StringBuilder builder = new StringBuilder();
+        return artistWithUL;
+    }
+
+    private static String parseResponse(String file, String artist) throws ParseException {
+        String artistWithUL = checkArtist(artist);
+        Map<Integer, String> map = new HashMap<>();
+        JSONObject response = (JSONObject) new JSONParser().parse(file);  // Parsing response as a JSONObject
+        JSONArray array = (JSONArray) response.get("results");            // Parsing results from it as a JSONArray
         for (Object el : array) {
-            JSONObject object1 = (JSONObject) el; // Parsing release as JSONObject
-            // Preparing a string for printing such way: "(Release name) (Year of release)"
-            String line = String.format("%s %s\n", object1.get("title").toString(), object1.get("year"));
-            // Check if line contains desired artist
-            if (line.startsWith(artistWithUL) && !line.contains("null")) {
-                builder.append('\t').append(line.substring(line.indexOf('-') + 1));
+            JSONObject object = (JSONObject) el; // Parsing release as JSONObject
+            String title = object.get("title").toString();
+            Object year = object.get("year");
+            if (year == null) {
+                continue;
+            }
+            // Placing title and year to a map if it is about desired artist
+            if (title.startsWith(artistWithUL)) {
+                map.put(Integer.parseInt(year.toString()), title.substring(title.indexOf("-") + 1));
             }
         }
-        return builder.toString();
+        return sortReleases(map);
     }
 
     public static void main(String[] args) {
