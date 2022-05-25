@@ -3,16 +3,18 @@ public class Main {
     private static void printUsage() {
         System.out.println("""
                 "Usage:
-                \tjava DiscogsParser <artist_name> <mode>
-                - artist - name of artist you want to get information.
-                - mode - what do you want to parse (1 - artist's releases, 2 - all members occurrences in other groups.
-                (mode 1 is set by default)""");
+                \tjava DiscogsParser <artist_name>""");
     }
 
     public static void main(String[] args) {
-        Parser parser = new DiscogsParser();
-        System.out.println(parser.getArtistReleases("nirvana"));
 
-        System.out.println(parser.getGroupMembersHistory("nirvana"));
+        if (args.length != 1) {
+            printUsage();
+            System.exit(1);
+        }
+        String artist = args[0];
+        Parser parser = new DiscogsParser();
+        System.out.println(parser.getArtistReleases(artist));
+        System.out.println(parser.getGroupMembersHistory(artist));
     }
 }
