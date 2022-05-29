@@ -1,82 +1,117 @@
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
-public class DiscogsParser implements Parser {
+public class DiscogsParser {
 
-    private String verifyResponse(HttpURLConnection connection) throws IOException {
-        int responseCode = connection.getResponseCode();
-        if (responseCode != 200) {
-            return String.format("Bad response code: %s", responseCode);
-        }
-        if (!connection.getContentType().equals("application/json")) {
-            return String.format("Non valid content/type: %s", connection.getContentType());
-        }
-        return "OK";
-    }
-
-    public static String getResponseContent(HttpURLConnection connection) throws IOException {
+    private String sortReleases(Map<Integer, String> releases) {
+        Map<Integer, String> treeMap = new TreeMap<>(releases);
         StringBuilder builder = new StringBuilder();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            builder.append(line);
+        for (Integer i : treeMap.keySet()) {
+            builder.append('\t').append(treeMap.get(i)).append(" ").append(i).append('\n');
         }
-        reader.close();
         return builder.toString();
     }
 
-    @Override
-    public String getArtistReleases(String artist) {
-        try {
-            URL url = new URL(DiscogsUtil.getArtistAlbums(artist));
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            String responseInformation = verifyResponse(connection);
-
-            if (responseInformation.equals("OK")) {
-                String artistWithUC = DiscogsUtil.checkArtist(artist);
-                String result = DiscogsUtil.parseReleases(getResponseContent(connection), artistWithUC);
-                if (result.length() != 0) {
-                    return "For provided artist (" + artistWithUC + ") found next releases:\n" + result;
-                } else {
-                    return "Can't find any releases for provided artist: " + artist;
-                }
-            } else {
-                return responseInformation;
+    private void addReleasesToMap(JSONArray array, Map<Integer, String> releases, String artist) {
+        for (Object release : array) {
+            JSONObject object = (JSONObject) release;
+            String title = object.get("title").toString();
+            Object year = object.get("year");
+            if (year == null) {
+                continue;
             }
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException | ParseException e) {
-            throw new RuntimeException(e);
+            if (title.startsWith(artist)) {
+                releases.put(Integer.parseInt(year.toString()), title.substring(title.indexOf("-") + 1));
+            }
         }
-        return "Failure occurred";
     }
 
-    @Override
-    public String getGroupMembersHistory(String artist) {
+    public String parseReleases(String file, String artist) {
+        Map<Integer, String> releases = new HashMap<>();
         try {
-            URL urlArtistID = new URL(DiscogsUtil.getArtistID(artist));
-            HttpURLConnection connection = (HttpURLConnection) urlArtistID.openConnection();
-            connection.setRequestMethod("GET");
-            String responseInformation = verifyResponse(connection);
-            if (responseInformation.equals("OK")) {
-                String artistID = DiscogsUtil.parseArtistID(getResponseContent(connection));
-                URL urlMembers = new URL(DiscogsUtil.getArtistMembers(artistID));
-                connection = (HttpURLConnection) urlMembers.openConnection();
-                connection.setRequestMethod("GET");
-                return DiscogsUtil.parseMembers(getResponseContent(connection)).toString();
-            } else {
-                return responseInformation;
-            }
-        } catch (IOException | ParseException e) {
-            e.printStackTrace();
+            JSONObject response = (JSONObject) new JSONParser().parse(file);
+            JSONArray array = (JSONArray) response.get("results");
+            addReleasesToMap(array, releases, artist);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
         }
-        return "Failure occurred";
+        String result = sortReleases(releases);
+        if (result.length() != 0) {
+            return "For provided artist (" + artist + ") found next releases:\n" + result;
+        } else {
+            throw new RuntimeException("Can't find any releases for provided artist: " + artist);
+        }
+    }
+
+    private String findArtistID(JSONArray artists, String artistNameArg) {
+        for (Object artistOBJ : artists) {
+            JSONObject artist = (JSONObject) artistOBJ;
+            if (artistNameArg.equals(artist.get("title").toString())) {
+                String artistName = artist.get("title").toString();
+                String artistID = artist.get("id").toString();
+                System.out.println("Artist/Group was found successfully: name=" +
+                        artistName + ", id=" + artistID + '\n');
+                return artistID;
+            }
+        }
+        throw new RuntimeException("Can't find artist with provided name: " + artistNameArg);
+    }
+
+    public String parseArtistID(String file, String artist) {
+        try {
+            JSONObject response = (JSONObject) new JSONParser().parse(file);
+            JSONArray artists = (JSONArray) response.get("results");
+            if (artists.size() == 0) {
+                throw new RuntimeException("Can't find artist ID");
+            }
+            return findArtistID(artists, artist);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void addMemberHistory(JSONArray groupsArray, Artist artist, Set<String> globalGroups) {
+        for (Object memberObj : groupsArray) {
+            JSONObject member = (JSONObject) memberObj;
+            String name = member.get("name").toString();
+            artist.addGroup(name);
+            globalGroups.add(name);
+        }
+    }
+
+    public void parseMemberHistory(String file, Artist artist, Set<String> globalGroups) {
+        try {
+            JSONObject object = (JSONObject) new JSONParser().parse(file);
+            JSONArray groupsArray = (JSONArray) object.get("groups");
+            addMemberHistory(groupsArray, artist, globalGroups);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<Artist> parseMembers(String file) {
+        try {
+            JSONObject object = (JSONObject) new JSONParser().parse(file);
+            JSONArray members = (JSONArray) object.get("members");
+            List<Artist> membersList = new ArrayList<>();
+            for (Object member : members) {
+                JSONObject memberObj = (JSONObject) member;
+                Artist artist =
+                        new Artist(Integer.parseInt(memberObj.get("id").toString()), memberObj.get("name").toString());
+                membersList.add(artist);
+            }
+            return membersList;
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
