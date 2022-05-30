@@ -92,6 +92,9 @@ public class DiscogsParser {
         try {
             JSONObject object = (JSONObject) new JSONParser().parse(file);
             JSONArray groupsArray = (JSONArray) object.get("groups");
+            if (groupsArray == null) {
+                return;
+            }
             addMemberHistory(groupsArray, artist, globalGroups);
         } catch (ParseException e) {
             throw new RuntimeException(e);
