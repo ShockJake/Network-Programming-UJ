@@ -16,7 +16,7 @@ public class DiscogsInformer implements Informer {
         String artistWithUC = "";
         if (artist.charAt(0) > 96 && artist.charAt(0) < 122) {
             artistWithUC += Character.toUpperCase(artist.charAt(0));    // If first letter of provided artist was in
-            artistWithUC += artist.substring(1);   // lower case, performing toUpperCase method
+            artistWithUC += artist.substring(1);               // lower case, performing toUpperCase method
         } else {                                                        // to perform search in result, otherwise just
             artistWithUC = artist;                                      // passing given artist name value.
         }
