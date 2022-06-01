@@ -1,11 +1,11 @@
-# Musical releases finder
+# Discogs Informer
 
-Program that parses artist's releases, for provided name od artist.
-Using Discogs REST API.
+Program that parses artist's releases and groups in which all members played, 
+for provided name od artist. Using Discogs REST API.
 
-After running program and providing artist name as input argument program sends
-**GET** requests to Discogs website, where Discogs API searches required data and
-sends a JSON file with list of releases or members of specific group,
+After running program and providing artist name (or artist ID for members history) 
+as input argument program sends **GET** requests to Discogs website, where Discogs API searches required data and
+sends a **JSON** file with list of releases or members of specific group,
 next step - program *filters* data and writes result to the **stdout**.
 
 ### Project structure:
