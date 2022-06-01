@@ -25,6 +25,8 @@ next step - program *filters* data and writes result to the **stdout**.
 
 - **Informer** - interface for using DiscogsInformer
 
+[Jar file](https://github.com/ShockJake/Network-Programming-UJ/tree/main/DiscogsReleaseFinder/out/artifacts/DiscogsInformer_jar "Jar") for downloading
+
 Libraries used:
 -
 
@@ -32,7 +34,7 @@ Libraries used:
 
 ## Compilation
 
-> $ java -cp json-simple-1.1.1.jar DiscogsInformer.java
+> $ javac -cp json-simple-1.1.1.jar DiscogsInformer.java
 
 ## Running
 
