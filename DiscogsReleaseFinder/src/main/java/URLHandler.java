@@ -32,6 +32,7 @@ public class URLHandler {
 
     public String downloadInformation(String artist, URLCreator creator) {
         try {
+            // Getting url using polymorphic classes implementing URLCreator interface
             URL url = new URL(creator.createURL(artist));
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
