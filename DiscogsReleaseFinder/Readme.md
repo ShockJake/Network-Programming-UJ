@@ -40,6 +40,10 @@ Libraries used:
 
 > $ java -cp json-simple-1.1.1.jar:. DiscogsInformer "*artist name*" "*flags...*"
 
+If you are using jar file:
+
+> $ java -cp DiscogsInformer.jar "*artist name*" "*flags...*"
+
 Flags:
 
 - -r - get Artist Releases
