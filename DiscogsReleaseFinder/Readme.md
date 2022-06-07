@@ -1,4 +1,4 @@
-# Discogs Informer
+x# Discogs Informer
 
 Program that parses artist's releases and groups in which all members played, 
 for provided name od artist. Using Discogs REST API.
@@ -25,7 +25,7 @@ next step - program *filters* data and writes result to the **stdout**.
 
 - **Informer** - interface for using DiscogsInformer
 
-[Jar file](https://github.com/ShockJake/Network-Programming-UJ/tree/main/DiscogsReleaseFinder/out/artifacts/DiscogsInformer_jar "Jar") for downloading
+[Jar file](https://github.com/ShockJake/Network-Programming-UJ/raw/main/DiscogsReleaseFinder/out/artifacts/DiscogsInformer_jar/DiscogsInformer.jar "Jar") for downloading
 
 Libraries used:
 -
