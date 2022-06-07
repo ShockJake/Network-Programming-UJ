@@ -1,4 +1,4 @@
-x# Discogs Informer
+# Discogs Informer
 
 Program that parses artist's releases and groups in which all members played, 
 for provided name od artist. Using Discogs REST API.
