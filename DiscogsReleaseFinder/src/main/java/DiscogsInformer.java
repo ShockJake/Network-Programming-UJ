@@ -8,8 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 public class DiscogsInformer implements Informer {
-    private final URLHandler urlHandler = new URLHandler();
-    private final DiscogsParser parser = new DiscogsParser();
+    private final InformationGetter getter = new InformationGetter();
 
     private static String checkArtist(String artist) {
         String artistWithUC = "";
@@ -24,23 +23,10 @@ public class DiscogsInformer implements Informer {
 
     @Override
     public String getArtistReleases(String artist) {
-        String releaseInformation = urlHandler.downloadInformation(checkArtist(artist), new ArtistReleaseURL());
-        return parser.parseReleases(releaseInformation, checkArtist(artist));
+        return getter.getReleases(checkArtist(artist));
     }
 
-    private void getMemberHistory(Artist artist, Set<String> globalGroups) {
-        // Performing sleep to prevent 429 (To many requests) response code
-        try {
-            System.out.print('.');
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        String memberHistory = urlHandler.downloadInformation(String.valueOf(artist.getID()), new ArtistMembersURL());
-        parser.parseMemberHistory(memberHistory, artist, globalGroups);
-    }
-
-    // Method to check if group contains
+    // Method to check if group contains more than one specific artist
     private boolean checkGroupMembers(String line) {
         String[] members = line.substring(line.indexOf(':') + 2).split(" ");
         return members.length > 3;
@@ -86,29 +72,15 @@ public class DiscogsInformer implements Informer {
         return getMembersHistoryResult(groups, artistName);
     }
 
-    private String getArtistID(String artist, boolean isID) {
-        // If id is already provided we don't need to search it
-        if (isID) {
-            return artist;
-        }
-        String artistInformation = urlHandler.downloadInformation(artist, new ArtistIdURL());
-        return parser.parseArtistID(artistInformation, artist);
-    }
-
-    private List<Artist> getMembersOfGroup(String artistID) {
-        String membersInformation = urlHandler.downloadInformation(artistID, new ArtistMembersURL());
-        return parser.parseMembers(membersInformation);
-    }
-
     @Override
     public String getGroupMembersHistory(String artist, boolean isID) {
-        String artistID = getArtistID(artist, isID);
-        List<Artist> members = getMembersOfGroup(artistID);
+        String artistID = getter.getArtistID(artist, isID);
+        List<Artist> members = getter.getMembersOfGroup(artistID);
         Set<String> globalGroups = new HashSet<>();
 
         System.out.print("Processing");
         for (Artist member : members) {
-            getMemberHistory(member, globalGroups);
+            getter.getMemberHistory(member, globalGroups);
         }
         System.out.println("\n Groups:");
         return getGroups(members, globalGroups, artist);
