@@ -1,9 +1,9 @@
 # Discogs Informer
 
-Program that parses artist's releases and groups in which all members played, 
+Program that parses artist's releases and groups in which all members played,
 for provided name od artist. Using Discogs REST API.
 
-After running program and providing artist name (or artist ID for members history) 
+After running program and providing artist name (or artist ID for members history)
 as input argument program sends **GET** requests to Discogs website, where Discogs API searches required data and
 sends a **JSON** file with list of releases or members of specific group,
 next step - program *filters* data and writes result to the **stdout**.
@@ -21,11 +21,15 @@ next step - program *filters* data and writes result to the **stdout**.
 - **DiscogsParser** - class that reads _JSON_ files and converts them into program
   readable information.
 
+- **Information Getter** - class for getting information to proceed, includes
+  checks and functionality with handling results of getting url and parsing.
+
 - **DiscogsInformer** - class that searches and sorts data got form Discogs website
 
 - **Informer** - interface for using DiscogsInformer
 
-[Jar file](https://github.com/ShockJake/Network-Programming-UJ/raw/main/DiscogsReleaseFinder/out/artifacts/DiscogsInformer_jar/DiscogsInformer.jar "Jar") for downloading
+[Jar file](https://github.com/ShockJake/Network-Programming-UJ/raw/main/DiscogsReleaseFinder/out/artifacts/DiscogsInformer_jar/DiscogsInformer.jar "Jar")
+for downloading.
 
 Libraries used:
 -
@@ -52,11 +56,14 @@ Flags:
 
 - -ID - you provide ID instead of Artist name (only for Members History mode)
 
-## Use
+## Example of use
 
 ```Java
 class Program {
     public static void main(String[] args) {
+        String artist = "nirvana";
+        boolean isID = false;
+        
         Informer informer = new DiscogsInformer();
         System.out.println(informer.getArtistReleases(artist));
         System.out.println(informer.getGroupMembersHistory(artist, isID));
