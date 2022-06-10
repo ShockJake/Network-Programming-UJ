@@ -1,3 +1,5 @@
+package discogs;
+
 import URLCreator.ArtistIdURL;
 import URLCreator.ArtistMembersURL;
 import URLCreator.ArtistReleaseURL;

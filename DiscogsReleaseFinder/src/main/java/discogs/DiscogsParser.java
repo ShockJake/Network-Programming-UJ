@@ -1,3 +1,5 @@
+package discogs;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -58,7 +60,7 @@ public class DiscogsParser {
             if (artistNameArg.equals(artist.get("title").toString())) {
                 String artistName = artist.get("title").toString();
                 String artistID = artist.get("id").toString();
-                System.out.println("Artist/Group was found successfully: name=" +
+                System.out.println("discogs.Artist/Group was found successfully: name=" +
                         artistName + ", id=" + artistID + '\n');
                 return artistID;
             }

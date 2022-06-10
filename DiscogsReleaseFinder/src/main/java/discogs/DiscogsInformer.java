@@ -1,6 +1,4 @@
-import URLCreator.ArtistIdURL;
-import URLCreator.ArtistMembersURL;
-import URLCreator.ArtistReleaseURL;
+package discogs;
 
 import java.util.ArrayList;
 import java.util.HashSet;

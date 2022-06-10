@@ -1,3 +1,6 @@
+import discogs.DiscogsInformer;
+import discogs.Informer;
+
 public class Main {
 
     private static void printUsage() {

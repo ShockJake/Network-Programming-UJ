@@ -1,7 +1,9 @@
+package discogs;
+
 import java.util.ArrayList;
 import java.util.List;
 
-// Data class Artist for storing data about specific member of a group
+// Data class discogs.Artist for storing data about specific member of a group
 public class Artist {
     private final int ID;
     private final String name;
@@ -35,7 +37,7 @@ public class Artist {
 
     @Override
     public String toString() {
-        return "Artist{" +
+        return "discogs.Artist{" +
                 "ID=" + ID +
                 ", name='" + name + '\'' +
                 '}';

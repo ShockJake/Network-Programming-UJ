@@ -1,3 +1,5 @@
+package discogs;
+
 import URLCreator.URLCreator;
 
 import java.io.BufferedReader;
