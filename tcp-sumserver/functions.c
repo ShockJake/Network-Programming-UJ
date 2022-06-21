@@ -41,30 +41,17 @@ void addEnding(char *data)
     strcat(data, "\r\n");
 }
 
-int createSocket(int port)
+void fill_sockaddrs_struct(int port, struct sockaddr_in *addr)
 {
-    // Socket creation with TCP specifications
-    int server_descriptor = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (server_descriptor == -1)
-    {
-        perror("Can't create socket");
-        exit(1);
-    }
+    memset(addr, 0, sizeof(*addr));
+    addr->sin_family = AF_INET;
+    addr->sin_port = htons(port);
+    addr->sin_addr.s_addr = htonl(INADDR_ANY);
+}
 
-    // Structure dor server data
-    struct sockaddr_in addres;
-
-    // Filling sockaddr_in
-    memset(&addres, 0, sizeof(addres));
-    addres.sin_family = AF_INET;
-    addres.sin_port = htons(port);
-    addres.sin_addr.s_addr = htonl(INADDR_ANY);
-
-    // Cast to const struct sockaddr for passing into functions
-    const struct sockaddr *addr = (const struct sockaddr *)&addres;
-
-    // Bining socket
-    if (bind(server_descriptor, addr, sizeof(addres)) == -1)
+void bind_and_listen(int server_descriptor, const struct sockaddr *addr)
+{
+    if (bind(server_descriptor, addr, sizeof(*addr)) == -1)
     {
         if (close(server_descriptor) == -1)
         {
@@ -83,9 +70,29 @@ int createSocket(int port)
             perror("Can't close server");
             exit(1);
         }
-        perror("Can't make the socket to listen");
+        perror("Can't make the socket listen");
         exit(1);
     }
+}
+
+int createSocket(int port)
+{
+    // Socket creation with TCP specifications
+    int server_descriptor = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (server_descriptor == -1)
+    {
+        perror("Can't create socket");
+        exit(1);
+    }
+
+    // Structure for server data
+    struct sockaddr_in addres;
+    fill_sockaddrs_struct(port, &addres);
+
+    // Cast to const struct sockaddr for passing into functions
+    const struct sockaddr *addr = (const struct sockaddr *)&addres;
+
+    bind_and_listen(server_descriptor, addr);
 
     return server_descriptor;
 }

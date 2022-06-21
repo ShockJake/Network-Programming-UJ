@@ -27,6 +27,10 @@ void sendError(int asd);
 void addEnding(char *data);
 // Function to create socket
 int createSocket(int port);
+// Function to fill the server sockaddr struct
+void fill_sockaddrs_struct(int port, struct sockaddr_in *addr);
+// Function to bind socket and make it listening to the new connections
+void bind_and_listen(int server_descriptor, const struct sockaddr *addr);
 // Function to close connection with client
 int closeConnection(int con);
 // Function to sum numbers that contained in message
