@@ -1,14 +1,13 @@
 CC = gcc
 CFLAGS = -pedantic -Wall -std=c99
 
-all: *.c
-	$(CC) $(CFLAGS) sumServer.c -o sumServer functions.c
+
+all: client server 
+	
+client: sumClient.c functions.c
 	$(CC) $(CFLAGS) sumClient.c -o sumClient functions.c
 
-client: sumClient.c
-	$(CC) $(CFLAGS) sumClient.c -o sumClient functions.c
-
-server: sumServer.c
+server: sumServer.c functions.c
 	$(CC) $(CFLAGS) sumServer.c -o sumServer functions.c
 
 .Phony:

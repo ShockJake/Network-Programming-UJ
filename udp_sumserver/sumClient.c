@@ -3,7 +3,7 @@
 void startUDPClient(const char *ip, int port)
 {
     // Tworzenie deskryprora klienckiego (client deskryptor)
-    int cd = createSocket();
+    int cd = create_socket();
 
     // Główny buffor
     char buf[MAX_LINE];

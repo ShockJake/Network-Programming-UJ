@@ -8,11 +8,7 @@ void sig_handler(int signum)
 {
     sleep(1);
     printf("\nClosing server...\n");
-    if (close(server_descriptor) == -1)
-    {
-        perror("Can't close server");
-        exit(1);
-    }
+    close_server(server_descriptor);
     exit(0);
 }
 
@@ -22,12 +18,12 @@ void *client_thread(void *arg)
     int s = *((int *)arg);
 
     unsigned long long int number;
-    if (!performAction(&number, s))
+    if (!perform_action(&number, s))
     {
-        sendError(s);
+        send_error(s);
     }
     printf("Closing connection with %i\n", s);
-    closeConnection(s);
+    close_connection(s);
     printf("------------------------------\n");
     free(arg);
     return NULL;
@@ -50,8 +46,8 @@ void client_handler(int port, int sd)
     pthread_attr_t attr;
     int errnum;
 
-    // Addres of client
-    char client_addres[INET_ADDRSTRLEN];
+    // Address of client
+    char client_address[INET_ADDRSTRLEN];
 
     // Thread attributes initialization
     errnum = pthread_attr_init(&attr);
@@ -60,11 +56,11 @@ void client_handler(int port, int sd)
         printf("Can't initialize thread\n");
         return;
     }
-    // Setting detach state of new thread 
+    // Setting detach state of new thread
     errnum = pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
     if (errnum != 0)
     {
-        printf("Can't detachstate thread\n");
+        printf("Can't detach thread state\n");
         cleanup_attr(&attr);
     }
 
@@ -86,59 +82,52 @@ void client_handler(int port, int sd)
             break;
         }
         *descriptor_ptr = client_descriptor;
-        
-        showNewClient(client_descriptor, client_addres, port);
-        int timeout = setTimeout(client_descriptor);
-        if(timeout == -1)
+
+        show_new_client(client_descriptor, client_address, port);
+        int timeout = set_timeout(client_descriptor);
+        if (timeout == -1)
         {
             cleanup_attr(&attr);
             break;
         }
-        pthread_t thr;
+        pthread_t new_thread;
         // Creating thread for new client and passing client function to this thread
-        errnum = pthread_create(&thr, &attr, client_thread, descriptor_ptr);
+        errnum = pthread_create(&new_thread, &attr, client_thread, descriptor_ptr);
         if (errnum != 0)
         {
             perror("Can't create a thread");
-            closeConnection(client_descriptor);
+            close_connection(client_descriptor);
         }
     }
 }
 
-void startServer(int port)
+void start_server(int port)
 {
-    // Creating socket
-    server_descriptor = createSocket(port);
-
+    server_descriptor = create_socket(port);
     printf("\nServer is created, and listening on this port: %d\n", port);
-
-    // Starting handling clients
     client_handler(port, server_descriptor);
 }
 
 int main(int argc, char const *argv[])
 {
     signal(SIGINT, sig_handler);
-
-    // Port na którym gniazdko będzie słuchać i czekać na połączenie
     int port = 2020;
-
     if (argc == 2)
     {
         port = strtol(argv[1], NULL, 10);
-        if (port == 0) // Sprawdzenie czy udała się konwersja na int
+        if (port == 0)
         {
             perror("Wrong input");
             exit(1);
         }
     }
-    if (port < 1024) // Sprawdzenie czy podany port nie jest zamały
+    if (port < 1024)
     {
         printf("\nGiven port is to small\n");
         exit(0);
     }
 
-    startServer(port);
+    start_server(port);
 
     return 0;
 }

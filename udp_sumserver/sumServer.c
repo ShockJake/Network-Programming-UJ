@@ -54,7 +54,7 @@ int main(int argc, char const *argv[])
     }
 
     printf("\nStarting UDP server\n");
-    startSumServer(port);
+    start_sum_server(port);
 
     return 0;
 }

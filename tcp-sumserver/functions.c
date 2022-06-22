@@ -1,6 +1,6 @@
 #include "functions.h"
 
-bool isNumber(char input, unsigned short int *space_counter)
+bool is_number(char input, unsigned short int *space_counter)
 {
     if (input == ' ')
     {
@@ -8,12 +8,10 @@ bool isNumber(char input, unsigned short int *space_counter)
         *space_counter += 1;
         return true;
     }
-
     if (input == '\r' || input == '\n')
     {
         return true;
     }
-
     // Checking if a character is a number
     if (input < 58 && input > 47)
     {
@@ -24,7 +22,7 @@ bool isNumber(char input, unsigned short int *space_counter)
     return false;
 }
 
-void sendError(int asd)
+void send_error(int asd)
 {
     const char error_msg[7] = "ERROR\r\n";
     // Sending error to the client
@@ -36,7 +34,16 @@ void sendError(int asd)
     }
 }
 
-void addEnding(char *data)
+void close_server(int server_descriptor)
+{
+    if (close(server_descriptor) == -1)
+    {
+        perror("Can't close server");
+        exit(1);
+    }
+}
+
+void add_ending(char *data)
 {
     strcat(data, "\r\n");
 }
@@ -53,29 +60,19 @@ void bind_and_listen(int server_descriptor, const struct sockaddr *addr)
 {
     if (bind(server_descriptor, addr, sizeof(*addr)) == -1)
     {
-        if (close(server_descriptor) == -1)
-        {
-            perror("Can't close server");
-            exit(1);
-        }
+        close_server(server_descriptor);
         perror("Can't bind socket");
         exit(1);
     }
-
-    // Making socket to listen
     if (listen(server_descriptor, 10) == -1)
     {
-        if (close(server_descriptor) == -1)
-        {
-            perror("Can't close server");
-            exit(1);
-        }
+        close_server(server_descriptor);
         perror("Can't make the socket listen");
         exit(1);
     }
 }
 
-int createSocket(int port)
+int create_socket(int port)
 {
     // Socket creation with TCP specifications
     int server_descriptor = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -84,24 +81,20 @@ int createSocket(int port)
         perror("Can't create socket");
         exit(1);
     }
-
     // Structure for server data
-    struct sockaddr_in addres;
-    fill_sockaddrs_struct(port, &addres);
-
+    struct sockaddr_in address;
+    fill_sockaddrs_struct(port, &address);
     // Cast to const struct sockaddr for passing into functions
-    const struct sockaddr *addr = (const struct sockaddr *)&addres;
-
+    const struct sockaddr *addr = (const struct sockaddr *)&address;
     bind_and_listen(server_descriptor, addr);
 
     return server_descriptor;
 }
 
-unsigned long long int sumNumbers(char *data)
+unsigned long long int sum_numbers(char *data)
 {
     unsigned long long int number = 0;
     unsigned long long int result = 0;
-
     // Separating buffer to tokens
     char *numberStr = strtok(data, " ");
     while (numberStr != NULL)
@@ -117,13 +110,13 @@ unsigned long long int sumNumbers(char *data)
             return -1;
         }
         result += number;
-        // Moving througth the buffer
+        // Moving through the buffer
         numberStr = strtok(NULL, " ");
     }
     return result;
 }
 
-void sendData(unsigned long long int answer_int, int clientDescriptor)
+void send_data(unsigned long long int answer_int, int clientDescriptor)
 {
     ssize_t byteN;
     char answer_ch[12];
@@ -132,17 +125,17 @@ void sendData(unsigned long long int answer_int, int clientDescriptor)
     if (byteN == -1)
     {
         perror("Can't convert data");
-        sendError(clientDescriptor);
+        send_error(clientDescriptor);
         return;
     }
-    addEnding(answer_ch);
+    add_ending(answer_ch);
     printf("Result: %s", answer_ch);
 
-    // Lenght of answer
-    int lenght = strlen(answer_ch);
+    // Length of answer
+    int length = strlen(answer_ch);
 
     // Sending answer
-    byteN = write(clientDescriptor, answer_ch, lenght);
+    byteN = write(clientDescriptor, answer_ch, length);
     if (byteN == -1)
     {
         perror("Can't send data");
@@ -150,25 +143,25 @@ void sendData(unsigned long long int answer_int, int clientDescriptor)
     printf("Answer was sent successfully\n============================\n");
 }
 
-bool checkData(char *message)
+bool check_data(char *message)
 {
     unsigned short int space_counter = 0;
 
     // Variable to check if the message has \r in it
     bool hasR = false;
 
-    unsigned short int lenght = strlen(message);
-    if (lenght <= 0)
+    unsigned short int length = strlen(message);
+    if (length <= 0)
     {
         return false;
     }
 
-    // printf("[+] Checking data: %s| with lenght: %i\n", message, lenght);
+    // printf("[+] Checking data: %s| with length: %i\n", message, length);
 
     // Checking data
-    for (int i = 0; i < lenght; i++)
+    for (int i = 0; i < length; i++)
     {
-        if (isNumber(message[i], &space_counter))
+        if (is_number(message[i], &space_counter))
         {
             if (space_counter >= 2)
             {
@@ -176,7 +169,7 @@ bool checkData(char *message)
                 return false;
             }
         }
-        if (!isNumber(message[i], &space_counter))
+        if (!is_number(message[i], &space_counter))
         {
             printf("[-] Wrong data: %i : %i\n", (int)message[i], i);
             return false;
@@ -201,7 +194,7 @@ bool checkData(char *message)
         {
             if (message[0] == ' ' || message[i - 2] == ' ')
             {
-                printf("[-] Space in the begining or in the end of message\n");
+                printf("[-] Space in the beginning or in the end of message\n");
                 return false;
             }
         }
@@ -209,7 +202,7 @@ bool checkData(char *message)
     return true;
 }
 
-bool performAction(unsigned long long int *number, int cd)
+bool perform_action(unsigned long long int *number, int cd)
 {
     // unsigned short int space_counter = 0;
     char input[2] = {0, 0};
@@ -230,19 +223,19 @@ bool performAction(unsigned long long int *number, int cd)
         {
             printf("============================\n");
             printf("Message form the client - %i:\n:: %s\n", cd, message);
-            if (!checkData(message))
+            if (!check_data(message))
             {
                 printf("Sending error...\n");
                 // Sending errors
-                sendError(cd);
+                send_error(cd);
             }
             else
             {
                 // summing numbers
-                *number = sumNumbers(message);
+                *number = sum_numbers(message);
 
                 // Sending data to the client
-                sendData(*number, cd);
+                send_data(*number, cd);
             }
             memset(input, 0, sizeof(input));
             memset(message, 0, sizeof(input));
@@ -251,39 +244,39 @@ bool performAction(unsigned long long int *number, int cd)
     return true;
 }
 
-int closeConnection(int con)
+int close_connection(int con)
 {
-    int num = close(con);
-    if (num == -1)
+    int result = close(con);
+    if (result == -1)
     {
         perror("Can't close the connection");
     }
-    return num;
+    return result;
 }
 
-void showNewClient(int client_descriptor, char *client_addres, int port)
+void show_new_client(int client_descriptor, char *client_addr, int port)
 {
     // Structure for holding informations about client
     struct sockaddr_in _addr;
-    socklen_t lenght = sizeof(_addr);
+    socklen_t length = sizeof(_addr);
 
     // Getting name of client
-    if (getpeername(client_descriptor, (struct sockaddr *)&_addr, &lenght) == -1)
+    if (getpeername(client_descriptor, (struct sockaddr *)&_addr, &length) == -1)
     {
         perror("Can't get name of peer");
         exit(1);
     }
 
-    // Converting ip from binary to text and showing it's addres
-    const char *client_ip = inet_ntop(AF_INET, &(_addr.sin_addr), client_addres, INET_ADDRSTRLEN);
+    // Converting ip from binary to text and showing it's address
+    const char *client_ip = inet_ntop(AF_INET, &(_addr.sin_addr), client_addr, INET_ADDRSTRLEN);
     if (client_ip != NULL)
     {
         printf("-------------------------------\n");
-        printf("Connected with: %s:%d|\ndescriptor number: %i\n\n", client_addres, port, client_descriptor);
+        printf("Connected with: %s:%d|\ndescriptor number: %i\n\n", client_addr, port, client_descriptor);
     }
 }
 
-int setTimeout(int socket)
+int set_timeout(int socket)
 {
     // Structure for timeout specification
     struct timeval timeout;

@@ -19,31 +19,33 @@
 #include <sys/types.h>
 #include <limits.h>
 
-// Function to check if the charactes represents number
-bool isNumber(char input, unsigned short int *space_counter);
+// Function to check if the characters represents number
+bool is_number(char input, unsigned short int *space_counter);
 // Function to send an error to the client
-void sendError(int asd);
+void send_error(int asd);
 // Function to add "\r\n" at the end of message
-void addEnding(char *data);
+void add_ending(char *data);
 // Function to create socket
-int createSocket(int port);
+int create_socket(int port);
+// Function to close server socket
+void close_server(int server_descriptor);
 // Function to fill the server sockaddr struct
 void fill_sockaddrs_struct(int port, struct sockaddr_in *addr);
 // Function to bind socket and make it listening to the new connections
 void bind_and_listen(int server_descriptor, const struct sockaddr *addr);
 // Function to close connection with client
-int closeConnection(int con);
+int close_connection(int con);
 // Function to sum numbers that contained in message
-unsigned long long int sumNumbers(char *data);
+unsigned long long int sum_numbers(char *data);
 // Function to send answer from server to client
-void sendData(unsigned long long int answer_int, int clientDescriptor);
-// Function to verify that given data is accteptable by a server
-bool checkData(char *message);
+void send_data(unsigned long long int answer_int, int clientDescriptor);
+// Function to verify that given data is acceptable by a server
+bool check_data(char *message);
 // Function to communicate with client
-bool performAction(unsigned long long int *number, int cd);
-// Function to show addres of new client that is connected
-void showNewClient(int cliend_descriptor, char *client_addres, int port);
+bool perform_action(unsigned long long int *number, int cd);
+// Function to show address of new client that is connected
+void show_new_client(int client_descriptor, char *client_addr, int port);
 // Set timeout
-int setTimeout(int socket);
+int set_timeout(int socket);
 
 #endif // FUNCTIONS_H

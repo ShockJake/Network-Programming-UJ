@@ -24,37 +24,45 @@ int sd;
 void signal_handler(int signum);
 
 // Function to create socket for server
-int createSocket();
+int create_socket();
 
 // Function to check if input is a number
-bool isNumber(char input);
+bool is_number(char input);
 
 // Function to check if input has some different data except from numbers
-bool checkInput(char *data, int length, bool *isRN);
+bool check_input(char *data, int length, bool *isRN);
 
 // Server actions
-unsigned long long int performAction(char *data, int length);
+unsigned long long int perform_action(char *data, int length);
 
 // Function to create and start server
-void startSumServer(int port);
+void start_sum_server(int port);
 
 // Function to add a proper ending to the line
-void addEnding(char* data);
+void add_ending(char *data);
 
 // Function to send error message to the client
-int sendError(int sd, char* msg, size_t msg_len, struct sockaddr* clientAddr, socklen_t len);
+void send_error(char *msg, size_t msg_len, struct sockaddr *clientAddr, socklen_t len);
 
 // Function to fill socket address structures
 void fill_sock_addr_struct(struct sockaddr_in *server_addr, struct sockaddr_in *client_addr, int port);
 
 // Function to bind socket
-void bind_server_socket(int sd, struct sockaddr* server_addr);
+void bind_server_socket(struct sockaddr *server_addr);
 
 // Function to clear buffers and variables
-void clear_buffers_and_variables(char *answer, char *buff, char *result_char, bool *isRN); 
+void clear_buffers_and_variables(char *answer, char *buff, char *result_char, bool *isRN);
 
 // Function to receive info
-int receive_data(int sd, char *buff, struct sockaddr *client_addr, socklen_t *len);
+int receive_data(char *buff, struct sockaddr *client_addr, socklen_t *len);
 
+// Function to send data
+void send_data(char *answer, struct sockaddr *client_addr, socklen_t *len);
+
+// Function to convert int to char*
+bool convert_result(char *answer, unsigned long long int *result, struct sockaddr *client_addr, char *error_msg);
+
+// Function to close server socket
+void close_server();
 
 #endif

@@ -66,7 +66,7 @@ void signal_handler(int signum)
 bool verifyConnection(int sockD, char buf[], socklen_t lenght, struct sockaddr *sockaddr_in)
 {
     int n;
-    n = recvfrom(sockD, buf, MAXLINE, MSG_WAITALL, sockaddr_in, &lenght);
+    n = recvfrom(sockD, buf, MAX_LINE, MSG_WAITALL, sockaddr_in, &lenght);
     if (n > 0)
     {
         printf("\n-!!!- Connection is established successfully...\n");
@@ -85,7 +85,7 @@ void startUDPServer(int port)
     sd = createSocket();
 
     // Główny buffor
-    char buf[MAXLINE];
+    char buf[MAX_LINE];
 
     // Powiadomienie dla klientu
     char msg[13] = "Hello World\n";
