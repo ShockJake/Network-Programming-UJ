@@ -6,10 +6,10 @@ void startUDPClient(const char *ip, int port)
     int cd = createSocket();
 
     // Główny buffor
-    char buf[MAXLINE];
+    char buf[MAX_LINE];
 
     // Powiadomienie dla wysyłania do serwera
-    char msg[MAXLINE];
+    char msg[MAX_LINE];
 
     struct sockaddr_in server_addr;
 
@@ -30,7 +30,7 @@ void startUDPClient(const char *ip, int port)
     printf("\n-----\nMessage was successfully sent\n-----\n");
 
     // Przyjmowanie odwrotnego powiadomienia
-    n = recvfrom(cd, buf, MAXLINE, MSG_WAITALL, (struct sockaddr *)&server_addr, &len);
+    n = recvfrom(cd, buf, MAX_LINE, MSG_WAITALL, (struct sockaddr *)&server_addr, &len);
     if(n == -1)
     {
         printf("- !!! - Can't receive data from server\n");

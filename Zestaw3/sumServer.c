@@ -14,6 +14,17 @@
 
 #include "functions.h"
 
+void print_usage(int argc, char const *argv[])
+{
+    printf("\n*** Usage:\n first argument - port of the server you want to create (2020 - used by default).\n\n");
+    printf("You provided:\n");
+    for (int i = 0; i < argc; i++)
+    {
+        printf("%s ", argv[i]);
+    }
+    exit(1);
+}
+
 int main(int argc, char const *argv[])
 {
     signal(SIGINT, signal_handler);
@@ -21,10 +32,9 @@ int main(int argc, char const *argv[])
     // Sprawdzanie ilości argumentów
     if (argc < 1)
     {
-        printf("You wrote incorrect amount of arguments\n");
-        printf("\n*** Usage:\n first argument - port of the server you want to create (2020 - used by default).\n\n");
-        exit(0);
+        print_usage(argc, argv);
     }
+
     // Port na którym gniazdko będzie słuchać i czekać na połączenie
     int port = 2020;
 
