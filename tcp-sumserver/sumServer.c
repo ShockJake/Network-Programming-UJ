@@ -15,21 +15,20 @@ void sig_handler(int signum)
 // Function for clients
 void *client_thread(void *arg)
 {
-    int s = *((int *)arg);
-
+    int client_descriptor = *((int *)arg);
     unsigned long long int number;
-    if (!perform_action(&number, s))
+    if (!perform_action(&number, client_descriptor))
     {
-        send_error(s);
+        send_error(client_descriptor);
     }
-    printf("Closing connection with %i\n", s);
-    close_connection(s);
+    printf("Closing connection with %i\n", client_descriptor);
+    close_connection(client_descriptor);
     printf("------------------------------\n");
     free(arg);
     return NULL;
 }
 
-// Function for cleaning if there was some failure
+// Function for cleaning thread attributes if there was some failure
 void cleanup_attr(pthread_attr_t *attr)
 {
     // Destroying thread
@@ -40,30 +39,61 @@ void cleanup_attr(pthread_attr_t *attr)
     }
 }
 
+void set_detach_state_of_thread(pthread_attr_t *attr)
+{
+    int errnum = pthread_attr_setdetachstate(attr, PTHREAD_CREATE_DETACHED);
+    if (errnum != 0)
+    {
+        printf("Can't detach thread state\n");
+        cleanup_attr(attr);
+    }
+}
+
+void create_thread_for_client(pthread_attr_t *attr, int *descriptor_ptr, int client_descriptor)
+{
+    pthread_t new_thread;
+    // Creating thread for new client and passing client function to this thread
+    int errnum = pthread_create(&new_thread, attr, client_thread, descriptor_ptr);
+    if (errnum != 0)
+    {
+        perror("Can't create a thread");
+        close_connection(client_descriptor);
+    }
+}
+
+int set_timeout_to_a_new_client(int client_descriptor, pthread_attr_t *attr)
+{
+    int timeout = set_timeout(client_descriptor);
+    if (timeout == -1)
+    {
+        cleanup_attr(attr);
+        return 1;
+    }
+    return 0;
+}
+
+int initialize_thread_attrs(pthread_attr_t *attr)
+{
+    int error_num = pthread_attr_init(attr);
+    if (error_num != 0)
+    {
+        printf("Can't initialize thread\n");
+        return 1;
+    }
+    return 0;
+}
+
 void client_handler(int port, int sd)
 {
     // Thread attributes
     pthread_attr_t attr;
-    int errnum;
-
     // Address of client
     char client_address[INET_ADDRSTRLEN];
-
-    // Thread attributes initialization
-    errnum = pthread_attr_init(&attr);
-    if (errnum != 0)
+    if (initialize_thread_attrs(&attr))
     {
-        printf("Can't initialize thread\n");
         return;
     }
-    // Setting detach state of new thread
-    errnum = pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-    if (errnum != 0)
-    {
-        printf("Can't detach thread state\n");
-        cleanup_attr(&attr);
-    }
-
+    set_detach_state_of_thread(&attr);
     // Main loop
     while (true)
     {
@@ -84,20 +114,11 @@ void client_handler(int port, int sd)
         *descriptor_ptr = client_descriptor;
 
         show_new_client(client_descriptor, client_address, port);
-        int timeout = set_timeout(client_descriptor);
-        if (timeout == -1)
+        if (set_timeout_to_a_new_client(client_descriptor, &attr))
         {
-            cleanup_attr(&attr);
             break;
         }
-        pthread_t new_thread;
-        // Creating thread for new client and passing client function to this thread
-        errnum = pthread_create(&new_thread, &attr, client_thread, descriptor_ptr);
-        if (errnum != 0)
-        {
-            perror("Can't create a thread");
-            close_connection(client_descriptor);
-        }
+        create_thread_for_client(&attr, descriptor_ptr, client_descriptor);
     }
 }
 
@@ -106,6 +127,7 @@ void start_server(int port)
     server_descriptor = create_socket(port);
     printf("\nServer is created, and listening on this port: %d\n", port);
     client_handler(port, server_descriptor);
+    close_server(server_descriptor);
 }
 
 int main(int argc, char const *argv[])
@@ -126,8 +148,6 @@ int main(int argc, char const *argv[])
         printf("\nGiven port is to small\n");
         exit(0);
     }
-
     start_server(port);
-
     return 0;
 }
